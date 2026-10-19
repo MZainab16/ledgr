@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase.js";
-import { Wordmark } from "../App.jsx";
+import { supabase } from "./supabase.js";
+import { Wordmark } from "./App.jsx";
 
 export default function Auth() {
   const [mode, setMode] = useState("signin"); // signin | signup | reset
