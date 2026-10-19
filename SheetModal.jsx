@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "./Modal.jsx";
-import { callFn } from "../lib/supabase.js";
+import { callFn } from "./supabase.js";
+
 
 const PENDING_KEY = "ledgr_pending_sheet_receipts";
 
