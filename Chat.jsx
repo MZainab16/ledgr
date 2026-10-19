@@ -7,6 +7,7 @@ import ReceiptCard from "./ReceiptCard.jsx";
 import ExtractModal from "./ExtractModal.jsx";
 import SheetModal, { takePending } from "./SheetModal.jsx";
 
+
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 const MAX_BYTES = 10 * 1024 * 1024;
 
