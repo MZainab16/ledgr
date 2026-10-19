@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase.js";
-import { money, niceDate } from "../lib/format.js";
+import { supabase } from "./supabase.js";
+import { money, niceDate } from "./format.js";
+
 
 export default function ReceiptCard({ receipt, onExtract, onSendToSheets, sheetTitle }) {
   const [thumb, setThumb] = useState(null);
