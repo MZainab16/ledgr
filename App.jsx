@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "./lib/supabase.js";
-import Auth from "./components/Auth.jsx";
-import Chat from "./components/Chat.jsx";
+import { supabase } from "./supabase.js";
+import Auth from "./Auth.jsx";
+import Chat from "./Chat.jsx";
 
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = still checking
