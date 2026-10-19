@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { supabase, callFn } from "../lib/supabase.js";
-import { prepareFile } from "../lib/image.js";
-import { renderMarkdown } from "../lib/format.js";
-import { Wordmark } from "../App.jsx";
+import { supabase, callFn } from "./supabase.js";
+import { prepareFile } from "./image.js";
+import { renderMarkdown } from "./format.js";
+import { Wordmark } from "./App.jsx";
 import ReceiptCard from "./ReceiptCard.jsx";
 import ExtractModal from "./ExtractModal.jsx";
 import SheetModal, { takePending } from "./SheetModal.jsx";
