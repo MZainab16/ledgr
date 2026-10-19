@@ -1,0 +1,19 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_SUPABASE_URL = "https://vbqzuetpdsudcbisvcqu.supabase.co"
+  VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_woNqP-6i0VjvrP5fK0ONPg_pg7cEHbv"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
