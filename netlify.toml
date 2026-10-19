@@ -3,8 +3,8 @@
   publish = "dist"
 
 [build.environment]
-  VITE_SUPABASE_URL = "https://vbqzuetpdsudcbisvcqu.supabase.co"
-  VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_woNqP-6i0VjvrP5fK0ONPg_pg7cEHbv"
+  VITE_SUPABASE_URL = "https://xktpkgxjjczymoaiyvix.supabase.co"
+  VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_AiIEbKbmuwCYcgf3jyVRCQ_FuW6mhna"
 
 [[redirects]]
   from = "/*"
