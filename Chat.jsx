@@ -6,6 +6,7 @@ import { Wordmark } from "./App.jsx";
 import ReceiptCard from "./ReceiptCard.jsx";
 import ExtractModal from "./ExtractModal.jsx";
 import SheetModal, { takePending } from "./SheetModal.jsx";
+import UpgradeModal from "./UpgradeModal.jsx";
 
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -23,6 +24,8 @@ export default function Chat({ session }) {
   const [extractFor, setExtractFor] = useState(null); // receipt ids waiting for the pop-up
   const [sheetFor, setSheetFor] = useState(null);     // receipt ids to send to Sheets
   const [menuOpen, setMenuOpen] = useState(false);
+  const [billing, setBilling] = useState(null);       // { pro, free_left, ... }
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const fileRef = useRef(null);
   const endRef = useRef(null);
 
@@ -42,6 +45,31 @@ export default function Chat({ session }) {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  const loadBilling = useCallback(async () => {
+    try { setBilling(await callFn("billing", { action: "status" })); } catch { /* shown later if needed */ }
+  }, []);
+  useEffect(() => { loadBilling(); }, [loadBilling]);
+
+  // Coming back from Paystack checkout
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("billing") !== "done") return;
+    const reference = params.get("reference") || params.get("trxref");
+    window.history.replaceState({}, "", window.location.pathname);
+    if (!reference) return;
+    callFn("billing", { action: "verify", reference })
+      .then((b) => {
+        setBilling(b);
+        flash(b.verified ? "Welcome to Ledgr Pro! Unlimited receipts unlocked." : "Payment not completed.");
+      })
+      .catch((e) => flash(e.message));
+  }, []);
+
+  const noteUse = (freeLeft) => {
+    if (freeLeft == null) return;
+    setBilling((b) => (b ? { ...b, free_left: freeLeft } : b));
+  };
 
   // Coming back from Google sign-in
   useEffect(() => {
@@ -105,10 +133,18 @@ export default function Chat({ session }) {
     for (const id of ids) {
       patchReceipt({ id, status: "extracting", error: null });
       try {
-        const { receipt } = await callFn("extract-receipt", { receipt_id: id, instructions });
+        const { receipt, free_left } = await callFn("extract-receipt", { receipt_id: id, instructions });
         patchReceipt(receipt);
+        noteUse(free_left);
         done.push(id);
       } catch (e) {
+        if (e.payload?.paywall) {
+          // Out of free tries: put the rest back as "not read yet" and show the upgrade screen
+          ids.slice(ids.indexOf(id)).forEach((rid) => patchReceipt({ id: rid, status: "uploaded", error: null }));
+          setBilling((b) => (b ? { ...b, free_left: 0 } : b));
+          setUpgradeOpen(true);
+          break;
+        }
         patchReceipt({ id, status: "failed", error: e.message });
       }
     }
@@ -125,14 +161,28 @@ export default function Chat({ session }) {
     setMessages((m) => [...m, temp]);
     setThinking(true);
     try {
-      const { message } = await callFn("chat", { message: text });
+      const { message, free_left } = await callFn("chat", { message: text });
       setMessages((m) => [...m, message]);
+      noteUse(free_left);
     } catch (err) {
+      if (err.payload?.paywall) {
+        setMessages((m) => m.filter((x) => x.id !== temp.id));
+        setDraft(text);
+        setBilling((b) => (b ? { ...b, free_left: 0 } : b));
+        setUpgradeOpen(true);
+        return;
+      }
       setMessages((m) => [...m, {
         id: `err-${Date.now()}`, role: "assistant", error: true,
         content: err.message || "Something went wrong.", created_at: new Date().toISOString(),
       }]);
     } finally { setThinking(false); }
+  }
+
+  async function manageSubscription() {
+    setMenuOpen(false);
+    try { const { url } = await callFn("billing", { action: "manage" }); window.location.href = url; }
+    catch (e) { flash(e.message); }
   }
 
   async function disconnectGoogle() {
@@ -148,6 +198,13 @@ export default function Chat({ session }) {
     <div className="app">
       <header className="topbar">
         <Wordmark small />
+        {billing && (
+          billing.pro
+            ? <span className="plan-chip plan-pro">Pro</span>
+            : <button className={`plan-chip ${billing.free_left === 0 ? "plan-out" : ""}`} onClick={() => setUpgradeOpen(true)}>
+                {billing.free_left > 0 ? `${billing.free_left} of ${billing.free_limit} free left` : "Upgrade"}
+              </button>
+        )}
         <div className="menu-wrap">
           <button className="icon-btn" aria-label="Account menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((o) => !o)}>
             <span className="avatar">{(firstName || user.email)[0].toUpperCase()}</span>
@@ -155,6 +212,9 @@ export default function Chat({ session }) {
           {menuOpen && (
             <div className="menu" role="menu">
               <p className="menu-email">{user.email}</p>
+              {billing?.pro
+                ? <button role="menuitem" onClick={manageSubscription}>Manage subscription</button>
+                : <button role="menuitem" onClick={() => { setMenuOpen(false); setUpgradeOpen(true); }}>Upgrade to Pro</button>}
               <button role="menuitem" onClick={disconnectGoogle}>Disconnect Google</button>
               <button role="menuitem" onClick={() => supabase.auth.signOut()}>Sign out</button>
             </div>
@@ -225,6 +285,7 @@ export default function Chat({ session }) {
         <ExtractModal count={extractFor.length} onLater={() => setExtractFor(null)}
           onExtract={(instructions) => extract(extractFor, instructions)} />
       )}
+      {upgradeOpen && <UpgradeModal onClose={() => setUpgradeOpen(false)} />}
       {sheetFor && (
         <SheetModal receiptIds={sheetFor} onClose={() => setSheetFor(null)}
           onDone={(sheet) => {
