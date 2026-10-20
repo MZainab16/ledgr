@@ -277,3 +277,27 @@ input:focus, textarea:focus { border-color: var(--ledger); outline: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* Plan chip and upgrade card */
+.topbar { gap: .75rem; }
+.topbar .wordmark { margin-right: auto; }
+.plan-chip {
+  font: inherit; font-size: .8rem; font-weight: 600;
+  padding: .3rem .7rem; border-radius: 999px;
+  border: 1.5px solid #D5DEDA; background: #FFFFFF; color: #5D6B68;
+  cursor: pointer; white-space: nowrap;
+}
+.plan-pro { background: #1F7A5C; border-color: #1F7A5C; color: #FFFFFF; cursor: default; }
+.plan-out { border-color: #1F7A5C; color: #1F7A5C; }
+.price-card { border: 1.5px solid #1F7A5C; border-radius: 10px; padding: 1rem; background: #E3F1EB; }
+.price-line { display: flex; align-items: baseline; gap: .3rem; margin-bottom: .5rem; }
+.price-amount { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; border-bottom: 4px double #15233B; line-height: 1.2; }
+.perks { margin: 0; padding-left: 1.1rem; display: grid; gap: .25rem; }
+@media (prefers-color-scheme: dark) {
+  .plan-chip { border-color: #26362F; background: #16211D; color: #97A7A1; }
+  .plan-pro { background: #43B98C; border-color: #43B98C; color: #07120D; }
+  .plan-out { border-color: #43B98C; color: #43B98C; }
+  .price-card { border-color: #43B98C; background: #173229; }
+  .price-amount { border-bottom-color: #E6EEEA; }
+}
+
