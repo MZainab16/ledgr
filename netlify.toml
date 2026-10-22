@@ -6,6 +6,13 @@
   VITE_SUPABASE_URL = "https://xktpkgxjjczymoaiyvix.supabase.co"
   VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_AiIEbKbmuwCYcgf3jyVRCQ_FuW6mhna"
 
+# Google sign-in comes back through your own domain, then quietly goes on to Supabase
+[[redirects]]
+  from = "/auth/google/callback"
+  to = "https://xktpkgxjjczymoaiyvix.supabase.co/functions/v1/google-auth/callback"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
