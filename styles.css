@@ -389,3 +389,30 @@ input:focus, textarea:focus { border-color: var(--ledger); outline: none; }
 .wordmark-sm .logo-mark { width: 30px; height: 30px; }
 .legal-note { font-size: .85rem; color: var(--muted); margin: 0; }
 .legal-note a, .auth-foot a { color: var(--ledger); font-weight: 600; }
+
+
+/* Feedback button and form */
+.feedback-btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  min-height: 36px; padding: .3rem .75rem; border-radius: 999px;
+  border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink);
+  font-weight: 600; font-size: .85rem; cursor: pointer;
+}
+.feedback-btn:hover { border-color: var(--ledger); }
+@media (max-width: 480px) { .feedback-btn span { display: none; } .feedback-btn { padding: .3rem .55rem; } }
+.feedback-form { display: grid; gap: 1rem; }
+.feedback-form fieldset { border: 0; margin: 0; padding: 0; }
+.feedback-form legend { font-weight: 600; font-size: .925rem; margin-bottom: .5rem; padding: 0; }
+.faces { display: flex; gap: .4rem; }
+.face {
+  flex: 1; min-height: 52px; border-radius: 12px; border: 1.5px solid var(--rule);
+  background: var(--sheet); font-size: 1.6rem; cursor: pointer; line-height: 1;
+}
+.face.on { border-color: var(--ledger); background: var(--ledger-soft); transform: scale(1.06); }
+.type-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.type-chip {
+  border: 1.5px solid var(--rule); background: var(--sheet); border-radius: 999px;
+  padding: .4rem .9rem; font-weight: 600; font-size: .875rem; cursor: pointer;
+}
+.type-chip.on { border-color: var(--ledger); background: var(--ledger-soft); color: var(--ledger); }
+@media (max-width: 480px) { .plan-chip { max-width: 38vw; overflow: hidden; text-overflow: ellipsis; } }

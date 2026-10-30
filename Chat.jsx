@@ -7,6 +7,7 @@ import ReceiptCard from "./ReceiptCard.jsx";
 import ExtractModal from "./ExtractModal.jsx";
 import SheetModal, { takePending } from "./SheetModal.jsx";
 import UpgradeModal from "./UpgradeModal.jsx";
+import FeedbackModal from "./FeedbackModal.jsx";
 
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -46,6 +47,7 @@ export default function Chat({ session }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [billing, setBilling] = useState(null);       // { pro, free_left, ... }
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const fileRef = useRef(null);
   const endRef = useRef(null);
   const askRef = useRef(null);
@@ -281,6 +283,10 @@ export default function Chat({ session }) {
                 (billing.chat_limit != null ? ", " + Math.max(billing.chat_limit - (billing.chat_used ?? 0), 0) + " questions" : "")}
           </span>
         )}
+        <button className="feedback-btn" onClick={() => setFeedbackOpen(true)} aria-label="Send feedback">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M8 9h8M8 12h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+          <span>Feedback</span>
+        </button>
         <div className="menu-wrap">
           <button className="icon-btn" aria-label="Account menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((o) => !o)}>
             <span className="avatar">{(firstName || user.email)[0].toUpperCase()}</span>
@@ -291,6 +297,7 @@ export default function Chat({ session }) {
               {billing?.pro
                 ? <button role="menuitem" onClick={manageSubscription}>Manage subscription</button>
                 : <button role="menuitem" onClick={() => { setMenuOpen(false); setUpgradeOpen(true); }}>Upgrade to Pro</button>}
+              <button role="menuitem" onClick={() => { setMenuOpen(false); setFeedbackOpen(true); }}>Send feedback</button>
               <button role="menuitem" onClick={disconnectGoogle}>Disconnect Google</button>
               <button role="menuitem" onClick={() => supabase.auth.signOut()}>Sign out</button>
             </div>
@@ -415,6 +422,7 @@ export default function Chat({ session }) {
         <ExtractModal count={extractFor.length} onLater={() => setExtractFor(null)}
           onExtract={(instructions) => extract(extractFor, instructions)} />
       )}
+      {feedbackOpen && <FeedbackModal email={user.email} onClose={() => setFeedbackOpen(false)} />}
       {upgradeOpen && <UpgradeModal onClose={() => setUpgradeOpen(false)} reason={upgradeReason} />}
       {sheetFor && (
         <SheetModal receiptIds={sheetFor} onClose={() => setSheetFor(null)}

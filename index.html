@@ -240,6 +240,28 @@
     footer a:hover { color: #C6F33D; }
     .legal { grid-column: 1 / -1; border-top: 1px solid #22463A; padding-top: 1.5rem; margin-top: 1rem; font-size: .85rem; }
 
+
+    .fb-launch { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 40; display: inline-flex; align-items: center; gap: .45rem; padding: .7rem 1.1rem; border-radius: 999px; border: 0; background: #163A2C; color: #FFFFFF; font: inherit; font-weight: 700; font-size: .95rem; cursor: pointer; box-shadow: 0 12px 30px -10px rgba(22,58,44,.55); }
+    .fb-launch svg { color: #C6F33D; }
+    .fb-panel { position: fixed; right: 1rem; bottom: calc(5rem + env(safe-area-inset-bottom)); z-index: 41; width: min(360px, calc(100vw - 2rem)); background: #FFFFFF; border: 1px solid #E1E8E2; border-radius: 22px; padding: 1.25rem; box-shadow: 0 30px 60px -20px rgba(22,58,44,.45); display: none; max-height: calc(100vh - 7rem); overflow-y: auto; }
+    .fb-panel.open { display: block; }
+    .fb-panel h2 { font-size: 1.2rem; margin: 0 2rem .25rem 0; }
+    .fb-panel .fb-sub { color: #6B7A72; font-size: .9rem; margin-bottom: 1rem; }
+    .fb-close { position: absolute; right: .75rem; top: .75rem; width: 36px; height: 36px; border-radius: 50%; border: 0; background: #EEF2EC; cursor: pointer; font-size: 1.1rem; }
+    .fb-panel fieldset { border: 0; padding: 0; margin: 0 0 .9rem; }
+    .fb-panel legend { font-weight: 700; font-size: .9rem; margin-bottom: .45rem; padding: 0; }
+    .fb-faces { display: flex; gap: .35rem; }
+    .fb-faces button { flex: 1; min-height: 48px; border-radius: 12px; border: 1.5px solid #E1E8E2; background: #F9FBF8; font-size: 1.5rem; cursor: pointer; line-height: 1; }
+    .fb-faces button[aria-pressed="true"] { border-color: #163A2C; background: #ECF8C9; }
+    .fb-types { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .fb-types button { border: 1.5px solid #E1E8E2; background: #F9FBF8; border-radius: 999px; padding: .35rem .85rem; font: inherit; font-weight: 600; font-size: .85rem; cursor: pointer; }
+    .fb-types button[aria-pressed="true"] { border-color: #163A2C; background: #163A2C; color: #C6F33D; }
+    .fb-panel textarea, .fb-panel input[type="email"] { width: 100%; font: inherit; font-size: .95rem; padding: .65rem .75rem; border: 1.5px solid #E1E8E2; border-radius: 12px; margin-bottom: .75rem; background: #FFFFFF; color: #13221B; }
+    .fb-panel textarea:focus, .fb-panel input:focus { outline: none; border-color: #163A2C; }
+    .fb-hp { position: absolute; left: -9999px; }
+    .fb-msg { font-size: .9rem; margin: 0 0 .75rem; }
+    .fb-msg.err { color: #B42318; }
+    .fb-panel .btn { width: 100%; justify-content: center; min-height: 46px; cursor: pointer; font: inherit; font-weight: 700; }
     @media (max-width: 900px) {
       .nav ul, .nav-actions .signin, .nav-actions .btn { display: none; }
       .menu-btn { display: grid; place-items: center; }
@@ -609,6 +631,110 @@
       menu.addEventListener("click", function (e) {
         if (e.target.tagName === "A") { menu.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
       });
+    })();
+  </script>
+
+  <button class="fb-launch" type="button" aria-expanded="false" aria-controls="fb-panel">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    Feedback
+  </button>
+  <div class="fb-panel" id="fb-panel" role="dialog" aria-modal="false" aria-labelledby="fb-title">
+    <button class="fb-close" type="button" aria-label="Close feedback">&times;</button>
+    <div id="fb-form-wrap">
+      <h2 id="fb-title">Share your feedback</h2>
+      <p class="fb-sub">Takes 20 seconds. It helps us build a better Ledgr.</p>
+      <form id="fb-form" novalidate>
+        <fieldset>
+          <legend>How do you feel about Ledgr?</legend>
+          <div class="fb-faces" data-group="rating">
+            <button type="button" data-v="1" aria-pressed="false" aria-label="Very poor">&#128542;</button>
+            <button type="button" data-v="2" aria-pressed="false" aria-label="Poor">&#128577;</button>
+            <button type="button" data-v="3" aria-pressed="false" aria-label="Okay">&#128528;</button>
+            <button type="button" data-v="4" aria-pressed="false" aria-label="Good">&#128578;</button>
+            <button type="button" data-v="5" aria-pressed="false" aria-label="Love it">&#128525;</button>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>What's it about?</legend>
+          <div class="fb-types" data-group="category">
+            <button type="button" data-v="idea" aria-pressed="false">Idea</button>
+            <button type="button" data-v="problem" aria-pressed="false">Problem</button>
+            <button type="button" data-v="praise" aria-pressed="false">Praise</button>
+            <button type="button" data-v="other" aria-pressed="true">Other</button>
+          </div>
+        </fieldset>
+        <label for="fb-message" class="fb-hp-label" style="display:block;font-weight:700;font-size:.9rem;margin-bottom:.45rem">Tell us more (optional)</label>
+        <textarea id="fb-message" rows="3" maxlength="2000" placeholder="What would make Ledgr more useful for your business?"></textarea>
+        <label for="fb-email" style="display:block;font-weight:700;font-size:.9rem;margin-bottom:.45rem">Email (optional, if you'd like a reply)</label>
+        <input id="fb-email" type="email" maxlength="200" autocomplete="email" placeholder="you@business.com" />
+        <input class="fb-hp" type="text" id="fb-company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <p class="fb-msg" id="fb-msg" role="status"></p>
+        <button class="btn btn-dark" type="submit" id="fb-submit">Send feedback</button>
+      </form>
+    </div>
+    <div id="fb-thanks" hidden>
+      <h2>Thank you!</h2>
+      <p class="fb-sub">Your feedback goes straight to the Ledgr team.</p>
+      <button class="btn btn-dark" type="button" id="fb-done">Close</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var SUPABASE_URL = "https://xktpkgxjjczymoaiyvix.supabase.co";
+      var SUPABASE_KEY = "sb_publishable_AiIEbKbmuwCYcgf3jyVRCQ_FuW6mhna";
+      var launch = document.querySelector(".fb-launch");
+      var panel = document.getElementById("fb-panel");
+      var form = document.getElementById("fb-form");
+      var msg = document.getElementById("fb-msg");
+      var state = { rating: 0, category: "other" };
+
+      function toggle(open) {
+        panel.classList.toggle("open", open);
+        launch.setAttribute("aria-expanded", open ? "true" : "false");
+        if (open) { var first = panel.querySelector(".fb-faces button"); if (first) first.focus(); }
+      }
+      launch.addEventListener("click", function () { toggle(!panel.classList.contains("open")); });
+      panel.querySelector(".fb-close").addEventListener("click", function () { toggle(false); launch.focus(); });
+      document.getElementById("fb-done").addEventListener("click", function () { toggle(false); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && panel.classList.contains("open")) { toggle(false); launch.focus(); } });
+
+      panel.querySelectorAll("[data-group]").forEach(function (group) {
+        group.addEventListener("click", function (e) {
+          var b = e.target.closest("button"); if (!b) return;
+          group.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+          var v = b.getAttribute("data-v");
+          state[group.getAttribute("data-group")] = group.getAttribute("data-group") === "rating" ? Number(v) : v;
+        });
+      });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        msg.className = "fb-msg"; msg.textContent = "";
+        if (document.getElementById("fb-company").value) { showThanks(); return; }
+        if (!state.rating) { msg.className = "fb-msg err"; msg.textContent = "Please pick a face to rate Ledgr."; return; }
+        var btn = document.getElementById("fb-submit"); btn.disabled = true; btn.textContent = "Sending...";
+        var body = {
+          rating: state.rating, category: state.category, source: "website",
+          message: document.getElementById("fb-message").value.trim().slice(0, 2000) || null,
+          email: document.getElementById("fb-email").value.trim().slice(0, 200) || null
+        };
+        fetch(SUPABASE_URL + "/rest/v1/feedback", {
+          method: "POST",
+          headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
+          body: JSON.stringify(body)
+        }).then(function (r) {
+          if (!r.ok) throw new Error("failed");
+          showThanks();
+        }).catch(function () {
+          msg.className = "fb-msg err"; msg.textContent = "Couldn't send that. Please try again.";
+        }).finally(function () { btn.disabled = false; btn.textContent = "Send feedback"; });
+      });
+
+      function showThanks() {
+        document.getElementById("fb-form-wrap").hidden = true;
+        document.getElementById("fb-thanks").hidden = false;
+      }
     })();
   </script>
 </body>
