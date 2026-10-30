@@ -16,11 +16,11 @@ export default function UpgradeModal({ onClose, reason }) {
 
   return (
     <Modal title="Upgrade to Ledgr Pro" onClose={onClose}>
-      <p>{reason || "You've used your 3 free tries."} Keep turning receipts into clean spreadsheets with Pro.</p>
+      <p>{reason ? reason + " " : ""}Pro gives you 100 receipts every month for ₦5,000.</p>
       <div className="price-card">
         <div className="price-line"><span className="price-amount">₦5,000</span><span className="muted">/month</span></div>
         <ul className="perks">
-          <li>Unlimited receipt extractions</li>
+          <li>100 receipts read every month</li>
           <li>Unlimited questions about your receipts</li>
           <li>Send to Google Sheets anytime</li>
           <li>Cancel anytime</li>

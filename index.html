@@ -1,18 +1,616 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#F4F7F5" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0E1613" media="(prefers-color-scheme: dark)" />
-    <link rel="icon" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <title>Ledgr: receipts into order</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/main.jsx"></script>
-  </body>
+<html lang="en-NG">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Ledgr: AI Receipt Scanner that Turns Receipts into Google Sheets | Nigeria</title>
+  <meta name="description" content="Ledgr is an AI receipt scanner for Nigerian businesses. Snap a receipt or invoice and Ledgr reads every line, saves it to Google Sheets, and answers questions about your spending. Try 3 receipts free." />
+  <link rel="canonical" href="https://useledgr.com.ng/" />
+  <meta name="theme-color" content="#163A2C" />
+  <link rel="icon" href="/favicon.svg" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Ledgr" />
+  <meta property="og:title" content="Ledgr: Turn messy receipts into clean Google Sheets" />
+  <meta property="og:description" content="Snap a receipt. Ledgr's AI reads every line and saves it to Google Sheets. Built for Nigerian businesses. Try 3 receipts free." />
+  <meta property="og:url" content="https://useledgr.com.ng/" />
+  <meta property="og:locale" content="en_NG" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    (function () {
+      var s = location.search, h = location.hash;
+      if (/[?&](google|billing)=/.test(s) || /access_token=|type=recovery|error_description=/.test(h)) {
+        location.replace("/app" + s + h);
+      }
+    })();
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://useledgr.com.ng/#org",
+        "name": "Ledgr",
+        "url": "https://useledgr.com.ng/",
+        "parentOrganization": { "@type": "Organization", "name": "FocusOnU Growth Consulting" },
+        "areaServed": "NG"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Ledgr",
+        "url": "https://useledgr.com.ng/",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, Android, iOS",
+        "description": "Ledgr is an AI receipt scanner that reads receipts, invoices and order slips and saves the details to Google Sheets, with an AI assistant that answers questions about your receipts.",
+        "publisher": { "@id": "https://useledgr.com.ng/#org" },
+        "offers": [
+          { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "NGN", "description": "3 free uses to try Ledgr" },
+          { "@type": "Offer", "name": "Pro", "price": "5000", "priceCurrency": "NGN", "description": "100 receipts every month and unlimited AI questions, billed monthly" }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "What is Ledgr?", "acceptedAnswer": { "@type": "Answer", "text": "Ledgr is an AI receipt scanner for businesses. You upload a photo or PDF of a receipt, invoice or order slip, and Ledgr reads every line, organises it into a clean table, and saves it to your Google Sheets." } },
+          { "@type": "Question", "name": "How do I turn receipts into a Google Sheet?", "acceptedAnswer": { "@type": "Answer", "text": "Sign up on Ledgr, upload a receipt photo or PDF, tap Extract information, then tap Send to Google Sheets. Ledgr creates a sheet with a Receipts tab and an Items tab, or adds to a sheet you made with Ledgr before." } },
+          { "@type": "Question", "name": "Is Ledgr free?", "acceptedAnswer": { "@type": "Answer", "text": "Every account starts with 3 free uses, shared between reading receipts and asking questions. Ledgr Pro costs 5,000 Naira a month and includes 100 receipts every month plus unlimited questions." } },
+          { "@type": "Question", "name": "What kinds of receipts can Ledgr read?", "acceptedAnswer": { "@type": "Answer", "text": "Ledgr reads printed shop receipts, POS slips, invoices, supplier bills and order slips, as photos (JPG, PNG, WEBP) or PDFs. Clear, well lit photos give the best results." } },
+          { "@type": "Question", "name": "Can Ledgr see my whole Google Drive?", "acceptedAnswer": { "@type": "Answer", "text": "No. Ledgr only asks Google for access to files it creates itself, so it can see and edit the sheets made through Ledgr and nothing else in your Drive." } },
+          { "@type": "Question", "name": "Does Ledgr work with Naira and Nigerian receipts?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Ledgr is built for Nigerian businesses. It understands Naira amounts and reads dates day first, the way Nigerian receipts print them, and it also handles other currencies." } },
+          { "@type": "Question", "name": "How do I pay for Ledgr Pro?", "acceptedAnswer": { "@type": "Answer", "text": "Ledgr Pro is paid monthly through Paystack by card, bank transfer or USSD. You can cancel anytime and keep Pro until the end of the month you paid for." } }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font: 17px/1.6 "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif; color: #13221B; background: #F4F6F1; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    img, svg { display: block; }
+    h1, h2, h3 { line-height: 1.15; margin: 0; letter-spacing: -0.02em; }
+    p { margin: 0; }
+    .wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 1.25rem; }
+    .btn { display: inline-flex; align-items: center; gap: .5rem; min-height: 48px; padding: .7rem 1.35rem; border-radius: 999px; font-weight: 700; text-decoration: none; border: 2px solid transparent; transition: transform .15s ease, background .15s ease; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #C6F33D; outline-offset: 3px; }
+    .btn-dark { background: #163A2C; color: #F4F6F1; }
+    .btn-lime { background: #C6F33D; color: #10251C; }
+    .btn-ghost { border-color: #163A2C; color: #163A2C; }
+    .btn-ghost-light { border-color: #C6F33D; color: #C6F33D; }
+    .eyebrow { display: inline-flex; align-items: center; gap: .55rem; font-weight: 600; font-size: .95rem; }
+    .dots { display: inline-flex; }
+    .dots i { width: 14px; height: 14px; border-radius: 50%; background: #C6F33D; display: block; }
+    .dots i + i { background: #163A2C; margin-left: -5px; }
+    .on-dark .dots i + i { background: #F4F6F1; }
+    .wordmark { font-weight: 800; letter-spacing: -0.04em; font-size: 1.6rem; text-decoration: none; padding-bottom: 2px; border-bottom: 5px double #C6F33D; }
+
+    .topbar { background: #163A2C; color: #DDE7DF; font-size: .85rem; }
+    .topbar .wrap { display: flex; justify-content: space-between; align-items: center; min-height: 40px; gap: 1rem; }
+    .topbar strong { color: #C6F33D; font-weight: 600; }
+    .nav { background: #FFFFFF; border-bottom: 1px solid #E1E8E2; position: sticky; top: 0; z-index: 10; }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; min-height: 72px; gap: 1rem; }
+    .nav ul { display: flex; gap: 1.75rem; list-style: none; margin: 0; padding: 0; font-size: .95rem; color: #4D5D55; }
+    .nav ul a { text-decoration: none; }
+    .nav ul a:hover { color: #13221B; }
+    .nav-actions { display: flex; gap: .6rem; align-items: center; }
+    .nav-actions .signin { font-weight: 600; text-decoration: none; padding: .5rem .75rem; }
+    .menu-btn { display: none; background: none; border: 0; width: 44px; height: 44px; cursor: pointer; }
+    .mobile-menu { display: none; }
+
+    .hero { padding: 4.5rem 0 4rem; overflow: hidden; }
+    .hero .wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 3rem; align-items: center; }
+    .hero h1 { font-size: clamp(2.3rem, 5.2vw, 3.7rem); margin: 1rem 0 1.1rem; font-weight: 800; }
+    .hero h1 em { font-style: normal; background: linear-gradient(transparent 62%, #C6F33D 62%); }
+    .hero .lead { font-size: 1.15rem; color: #4D5D55; max-width: 36rem; }
+    .hero-ctas { display: flex; gap: .9rem; flex-wrap: wrap; margin: 2rem 0 1.25rem; }
+    .trust { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: .9rem; color: #4D5D55; }
+    .trust span::before { content: "\2713"; color: #2E7D4F; font-weight: 800; margin-right: .4rem; }
+
+    .visual { position: relative; min-height: 470px; }
+    .paper-receipt { position: absolute; left: 0; top: 10px; width: 54%; background: #FFFFFF; border-radius: 6px 6px 0 0; padding: 1.2rem 1.1rem 1.6rem; font: 12.5px/1.55 ui-monospace, Menlo, Consolas, monospace; color: #3B463F; box-shadow: 0 24px 50px -24px rgba(22,58,44,.45); transform: rotate(-5deg); }
+    .paper-receipt::after { content: ""; position: absolute; left: 0; right: 0; bottom: -9px; height: 10px; background: linear-gradient(135deg, #FFFFFF 50%, transparent 50%) 0 0 / 12px 10px repeat-x, linear-gradient(225deg, #FFFFFF 50%, transparent 50%) 0 0 / 12px 10px repeat-x; }
+    .paper-receipt b { display: block; text-align: center; font-size: 13.5px; letter-spacing: .08em; color: #13221B; }
+    .paper-receipt .c { text-align: center; color: #7A857F; }
+    .paper-receipt hr { border: 0; border-top: 1.5px dashed #C9D1CB; margin: .55rem 0; }
+    .paper-receipt .r { display: flex; justify-content: space-between; gap: .5rem; }
+    .sheet-card { position: absolute; right: 0; bottom: 0; width: 70%; background: #FFFFFF; border-radius: 22px; padding: 1rem; box-shadow: 0 30px 60px -28px rgba(22,58,44,.5); border: 1px solid #E1E8E2; }
+    .sheet-tabs { display: flex; gap: .4rem; margin-bottom: .7rem; font-size: .78rem; font-weight: 700; }
+    .sheet-tabs span { padding: .3rem .7rem; border-radius: 999px; background: #EEF2EC; color: #4D5D55; }
+    .sheet-tabs span.on { background: #163A2C; color: #C6F33D; }
+    .sheet-card table { width: 100%; border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+    .sheet-card th { background: #1F7A5C; color: #FFFFFF; text-align: left; padding: .45rem .5rem; font-weight: 700; }
+    .sheet-card th:first-child { border-radius: 8px 0 0 8px; }
+    .sheet-card th:last-child { border-radius: 0 8px 8px 0; text-align: right; }
+    .sheet-card td { padding: .45rem .5rem; border-bottom: 1px solid #EEF2EC; }
+    .sheet-card td:last-child { text-align: right; font-weight: 600; }
+    .flow-arrow { position: absolute; left: 49%; top: 27%; width: 54px; height: 54px; border-radius: 50%; background: #C6F33D; display: grid; place-items: center; box-shadow: 0 10px 24px -10px rgba(22,58,44,.6); z-index: 2; }
+    .badge { position: absolute; right: 4%; top: 0; width: 118px; height: 118px; }
+    .badge .ring { animation: spin 18s linear infinite; transform-origin: 50% 50%; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .marquee { background: #163A2C; color: #FFFFFF; overflow: hidden; padding: 1.15rem 0; }
+    .marquee-track { display: flex; gap: 2.5rem; width: max-content; animation: slide 32s linear infinite; font-size: clamp(1.1rem, 2.4vw, 1.6rem); font-weight: 700; white-space: nowrap; }
+    .marquee-track span::after { content: "\2733"; color: #C6F33D; margin-left: 2.5rem; }
+    @keyframes slide { to { transform: translateX(-50%); } }
+
+    section { padding: 5rem 0; }
+    .center { text-align: center; }
+    .section-head { max-width: 46rem; margin: 0 auto 3rem; }
+    .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.7rem); margin-top: .8rem; font-weight: 800; }
+    .section-head p { margin-top: 1rem; color: #4D5D55; font-size: 1.08rem; }
+
+    .about { background: #FFFFFF; }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+    .about-copy p + p { margin-top: 1rem; }
+    .about-copy p { color: #4D5D55; }
+    .about-copy strong { color: #13221B; }
+    .bars { display: grid; gap: 1.4rem; }
+    .bar-top { display: flex; justify-content: space-between; font-weight: 700; font-size: .95rem; margin-bottom: .55rem; }
+    .bar { height: 8px; background: #EEF2EC; border-radius: 999px; position: relative; }
+    .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #163A2C; border-radius: 999px; }
+    .bar i::after { content: ""; position: absolute; right: -9px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); background: #C6F33D; border: 3px solid #163A2C; border-radius: 50%; }
+    .bar-note { font-size: .82rem; color: #6B7A72; margin-top: .4rem; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 3.5rem; border-top: 1px solid #E1E8E2; padding-top: 2.5rem; }
+    .stat { padding: 0 1.25rem; border-left: 1px solid #E1E8E2; }
+    .stat:first-child { border-left: 0; padding-left: 0; }
+    .stat b { display: block; font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 800; letter-spacing: -0.03em; }
+    .stat span { color: #6B7A72; font-size: .95rem; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; counter-reset: s; }
+    .step { background: #FFFFFF; border: 1px solid #E1E8E2; border-radius: 22px; padding: 1.75rem; }
+    .step::before { counter-increment: s; content: counter(s); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #C6F33D; font-weight: 800; margin-bottom: 1.1rem; }
+    .step h3 { font-size: 1.25rem; margin-bottom: .5rem; }
+    .step p { color: #4D5D55; }
+
+    .features { background: #163A2C; color: #F4F6F1; position: relative; }
+    .features::before, .features::after { content: ""; position: absolute; left: 0; right: 0; height: 18px; background: repeating-linear-gradient(135deg, rgba(198,243,61,.14) 0 2px, transparent 2px 10px); }
+    .features::before { top: 0; }
+    .features::after { bottom: 0; }
+    .features .section-head p { color: #BFD0C5; }
+    .feature-head { display: flex; justify-content: space-between; align-items: end; gap: 2rem; margin-bottom: 2.75rem; flex-wrap: wrap; }
+    .feature-head .section-head { margin: 0; text-align: left; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .card { background: #1F4A39; border: 1px solid #2D5B48; border-radius: 22px; padding: 1.6rem; }
+    .card.lime { background: #C6F33D; color: #10251C; border-color: #C6F33D; }
+    .card .ico { width: 48px; height: 48px; border-radius: 14px; background: #163A2C; display: grid; place-items: center; margin-bottom: 1.1rem; }
+    .card.lime .ico { background: #10251C; }
+    .card h3 { font-size: 1.2rem; margin-bottom: .55rem; }
+    .card p { color: #C9D7CE; font-size: .98rem; }
+    .card.lime p { color: #2A3D33; }
+
+    .who-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .who { background: #FFFFFF; border-radius: 18px; padding: 1.3rem 1.4rem; border: 1px solid #E1E8E2; }
+    .who h3 { font-size: 1.05rem; margin-bottom: .35rem; }
+    .who p { font-size: .95rem; color: #4D5D55; }
+
+    .benefits { background: #FFFFFF; }
+    .benefit-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem 2.5rem; max-width: 60rem; margin: 0 auto; }
+    .benefit { display: flex; gap: 1rem; }
+    .benefit::before { content: ""; flex: none; width: 12px; height: 12px; margin-top: .55rem; border-radius: 50%; background: #C6F33D; box-shadow: 0 0 0 4px #163A2C; }
+    .benefit h3 { font-size: 1.08rem; margin-bottom: .3rem; }
+    .benefit p { color: #4D5D55; font-size: .98rem; }
+
+    .plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; max-width: 50rem; margin: 0 auto; }
+    .plan { background: #FFFFFF; border: 1px solid #E1E8E2; border-radius: 26px; padding: 2rem; display: flex; flex-direction: column; }
+    .plan.pro { background: #163A2C; color: #F4F6F1; border-color: #163A2C; }
+    .plan h3 { font-size: 1.15rem; }
+    .price { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; margin: .8rem 0 .2rem; }
+    .price small { font-size: 1rem; font-weight: 500; color: #6B7A72; }
+    .plan.pro .price small { color: #BFD0C5; }
+    .plan ul { list-style: none; padding: 0; margin: 1.25rem 0 1.75rem; display: grid; gap: .6rem; flex: 1; }
+    .plan li::before { content: "\2713"; font-weight: 800; color: #2E7D4F; margin-right: .55rem; }
+    .plan.pro li::before { color: #C6F33D; }
+    .plan .btn { justify-content: center; }
+    .pay-note { text-align: center; color: #6B7A72; font-size: .9rem; margin-top: 1.5rem; }
+
+    .faq { background: #FFFFFF; }
+    .faq-list { max-width: 48rem; margin: 0 auto; display: grid; gap: .75rem; }
+    details { border: 1px solid #E1E8E2; border-radius: 18px; background: #F9FBF8; }
+    summary { cursor: pointer; list-style: none; padding: 1.1rem 1.3rem; font-weight: 700; font-size: 1.05rem; display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; flex: none; width: 30px; height: 30px; border-radius: 50%; background: #163A2C; color: #C6F33D; display: grid; place-items: center; font-weight: 800; }
+    details[open] summary::after { content: "\2212"; }
+    details p { padding: 0 1.3rem 1.2rem; color: #4D5D55; }
+
+    .cta { padding: 4rem 0 5rem; }
+    .cta-box { background: #163A2C; color: #F4F6F1; border-radius: 32px; padding: clamp(2rem, 6vw, 3.75rem); display: flex; justify-content: space-between; align-items: center; gap: 2rem; flex-wrap: wrap; }
+    .cta-box h2 { font-size: clamp(1.7rem, 3.6vw, 2.5rem); max-width: 30rem; }
+    .cta-box p { color: #BFD0C5; margin-top: .75rem; max-width: 30rem; }
+
+    footer { background: #0F2A20; color: #BFD0C5; padding: 3rem 0 2rem; font-size: .92rem; }
+    footer .wrap { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 2rem; }
+    footer .wordmark { color: #FFFFFF; }
+    footer h3 { color: #FFFFFF; font-size: 1rem; margin-bottom: .75rem; }
+    footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; }
+    footer a { text-decoration: none; }
+    footer a:hover { color: #C6F33D; }
+    .legal { grid-column: 1 / -1; border-top: 1px solid #22463A; padding-top: 1.5rem; margin-top: 1rem; font-size: .85rem; }
+
+    @media (max-width: 900px) {
+      .nav ul, .nav-actions .signin, .nav-actions .btn { display: none; }
+      .menu-btn { display: grid; place-items: center; }
+      .mobile-menu.open { display: grid; gap: .25rem; padding: .5rem 1.25rem 1.25rem; background: #FFFFFF; border-bottom: 1px solid #E1E8E2; }
+      .mobile-menu a { padding: .75rem 0; text-decoration: none; font-weight: 600; border-bottom: 1px solid #EEF2EC; }
+      .mobile-menu .btn { margin-top: .75rem; justify-content: center; border-bottom: 0; }
+      .topbar .hide-sm { display: none; }
+      .hero { padding-top: 2.5rem; }
+      .hero .wrap, .about-grid { grid-template-columns: 1fr; }
+      .visual { min-height: 400px; max-width: 460px; width: 100%; margin: 0 auto; }
+      .steps, .cards, .who-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 1.75rem 0; }
+      .stat:nth-child(3) { border-left: 0; padding-left: 0; }
+      .benefit-list, .plans { grid-template-columns: 1fr; }
+      footer .wrap { grid-template-columns: 1fr; }
+      section { padding: 3.75rem 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .marquee-track, .badge .ring { animation: none; }
+      .btn { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="wrap">
+      <span><strong>New:</strong> Ask AI questions about all your receipts</span>
+      <span class="hide-sm">Built in Nigeria for Nigerian businesses</span>
+    </div>
+  </div>
+
+  <header class="nav">
+    <div class="wrap">
+      <a href="/" class="wordmark" aria-label="Ledgr home">Ledgr</a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href="#how-it-works">How it works</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#who-its-for">Who it's for</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="/app" class="signin" data-app-link>Sign in</a>
+        <a href="/app" class="btn btn-dark" data-app-cta>Try 3 receipts free</a>
+        <button class="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="#13221B" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="#how-it-works">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#who-its-for">Who it's for</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="/app" data-app-link>Sign in</a>
+      <a href="/app" class="btn btn-dark" data-app-cta>Try 3 receipts free</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap">
+        <div>
+          <span class="eyebrow"><span class="dots"><i></i><i></i></span>AI receipt scanner for Nigerian businesses</span>
+          <h1 id="hero-title">Turn messy receipts into <em>clean spreadsheets</em></h1>
+          <p class="lead">Snap a receipt, invoice or order slip. Ledgr's AI reads every line, lays it out in a tidy table, and saves it straight to Google Sheets. Then just ask: "How much did I spend on supplies this month?"</p>
+          <div class="hero-ctas">
+            <a href="/app" class="btn btn-dark" data-app-cta>Try 3 receipts free
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="#how-it-works" class="btn btn-ghost">See how it works</a>
+          </div>
+          <div class="trust"><span>No card needed to start</span><span>Works on any phone</span><span>Saves to your own Google Sheets</span></div>
+        </div>
+
+        <div class="visual" aria-hidden="true">
+          <div class="paper-receipt">
+            <b>MAMA T SUPERMART</b>
+            <div class="c">Wuse 2, Abuja</div>
+            <hr />
+            <div class="r"><span>Date</span><span>01/07/2026</span></div>
+            <div class="r"><span>Receipt</span><span>#004812</span></div>
+            <hr />
+            <div class="r"><span>Rice 5kg x2</span><span>18,400</span></div>
+            <div class="r"><span>Veg oil 3L</span><span>7,250</span></div>
+            <div class="r"><span>Sugar 1kg x3</span><span>4,500</span></div>
+            <hr />
+            <div class="r"><b style="display:inline">TOTAL</b><b style="display:inline">&#8358;30,150</b></div>
+            <div class="c">Paid: POS</div>
+          </div>
+          <div class="flow-arrow">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="#10251C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="sheet-card">
+            <div class="sheet-tabs"><span class="on">Items</span><span>Receipts</span></div>
+            <table>
+              <thead><tr><th>Item</th><th>Qty</th><th>Amount</th></tr></thead>
+              <tbody>
+                <tr><td>Rice 5kg</td><td>2</td><td>18,400</td></tr>
+                <tr><td>Vegetable oil 3L</td><td>1</td><td>7,250</td></tr>
+                <tr><td>Sugar 1kg</td><td>3</td><td>4,500</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <svg class="badge" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="58" fill="#163A2C"/>
+            <defs><path id="circ" d="M60,60 m-42,0 a42,42 0 1,1 84,0 a42,42 0 1,1 -84,0"/></defs>
+            <g class="ring">
+              <text fill="#F4F6F1" font-size="12.5" font-weight="700" letter-spacing="2.4" font-family="Schibsted Grotesk, sans-serif">
+                <textPath href="#circ">3 FREE RECEIPTS &#8226; TRY LEDGR &#8226; </textPath>
+              </text>
+            </g>
+            <circle cx="60" cy="60" r="20" fill="#C6F33D"/>
+            <path d="M52 60h16M62 54l6 6-6 6" fill="none" stroke="#10251C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Shop receipts</span><span>Supplier invoices</span><span>POS slips</span><span>Order slips</span><span>Utility bills</span><span>Google Sheets</span>
+        <span>Shop receipts</span><span>Supplier invoices</span><span>POS slips</span><span>Order slips</span><span>Utility bills</span><span>Google Sheets</span>
+      </div>
+    </div>
+
+    <section class="about" id="what-is-ledgr" aria-labelledby="about-title">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="eyebrow"><span class="dots"><i></i><i></i></span>What is Ledgr?</span>
+          <h2 id="about-title">Bookkeeping that starts with a photo</h2>
+        </div>
+        <div class="about-grid">
+          <div class="about-copy">
+            <p><strong>Ledgr is an AI receipt scanner that turns paper receipts, invoices and order slips into organised Google Sheets.</strong> Instead of typing every item, price and total by hand, you upload a photo or PDF and Ledgr does the data entry for you in seconds.</p>
+            <p>Every receipt is read line by line: the business name, date, receipt number, each item with its quantity and price, the tax, the total and how it was paid. Ledgr then saves it to two clean tabs in your Google Sheet, one row per receipt and one row per item, so your numbers are ready to sort, filter and add up.</p>
+            <p>Your receipts also become searchable. Ask Ledgr's AI assistant questions in plain English, like "What did I buy from my supplier last week?" or "How much have I spent on fuel this month?", and get answers from your own receipts.</p>
+          </div>
+          <div class="bars" aria-label="Typing receipts by hand compared with Ledgr">
+            <div>
+              <div class="bar-top"><span>Data entry done for you</span><span>Every line</span></div>
+              <div class="bar"><i style="width: 94%"></i></div>
+              <p class="bar-note">Items, quantities, prices, tax and totals, captured automatically.</p>
+            </div>
+            <div>
+              <div class="bar-top"><span>Ready for Google Sheets</span><span>2 tabs</span></div>
+              <div class="bar"><i style="width: 86%"></i></div>
+              <p class="bar-note">A Receipts tab and an Items tab with real numbers you can total.</p>
+            </div>
+            <div>
+              <div class="bar-top"><span>Answers from your receipts</span><span>Ask AI</span></div>
+              <div class="bar"><i style="width: 78%"></i></div>
+              <p class="bar-note">Plain English questions answered from your saved receipts only.</p>
+            </div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>3</b><span>Free uses to try Ledgr</span></div>
+          <div class="stat"><b>100</b><span>Receipts a month on Pro</span></div>
+          <div class="stat"><b>&#8358;5,000</b><span>Pro plan, per month</span></div>
+          <div class="stat"><b>0</b><span>Rows typed by hand</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" aria-labelledby="how-title">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="eyebrow"><span class="dots"><i></i><i></i></span>How it works</span>
+          <h2 id="how-title">How do I turn receipts into a Google Sheet?</h2>
+          <p>Three steps, all from your phone. No templates, no typing.</p>
+        </div>
+        <div class="steps">
+          <div class="step"><h3>Snap or upload</h3><p>Take a photo of a receipt or upload a PDF invoice. You can add several at once.</p></div>
+          <div class="step"><h3>Ledgr reads it</h3><p>The AI pulls out the business, date, items, quantities, prices, tax and total, and shows them in a clean table for you to check.</p></div>
+          <div class="step"><h3>Save to Google Sheets</h3><p>Send it to a new sheet or one you made before. Ledgr fills a Receipts tab and an Items tab, ready to total.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features on-dark" id="features" aria-labelledby="features-title">
+      <div class="wrap">
+        <div class="feature-head">
+          <div class="section-head">
+            <span class="eyebrow"><span class="dots"><i></i><i></i></span>Features</span>
+            <h2 id="features-title">Everything you need to stop typing receipts</h2>
+          </div>
+          <a href="/app" class="btn btn-ghost-light" data-app-cta>Try 3 receipts free</a>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="#C6F33D" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="#C6F33D" stroke-width="1.8"/></svg></div>
+            <h3>AI receipt scanning</h3>
+            <p>Reads printed receipts, POS slips, invoices and order forms from photos or PDFs, and adapts to each layout.</p>
+          </div>
+          <div class="card lime">
+            <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" fill="#C6F33D"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z" fill="#C6F33D"/></svg></div>
+            <h3>Ask AI about your receipts</h3>
+            <p>Ask questions like "Which supplier did I spend the most with?" and get answers drawn only from your own receipts.</p>
+          </div>
+          <div class="card">
+            <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2.5" fill="none" stroke="#C6F33D" stroke-width="1.8"/><path d="M4 10h16M10 10v10" stroke="#C6F33D" stroke-width="1.8"/></svg></div>
+            <h3>Google Sheets, done right</h3>
+            <p>One row per receipt and one row per item, with a frozen header and real numbers, so totals and filters just work.</p>
+          </div>
+          <div class="card">
+            <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" fill="none" stroke="#C6F33D" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="#C6F33D" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+            <h3>Private by design</h3>
+            <p>Each account only sees its own receipts, and Ledgr can only open the Google Sheets it created for you.</p>
+          </div>
+          <div class="card">
+            <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M7 4v16M17 4v16M4 10h16M4 14h16" stroke="#C6F33D" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+            <h3>Built for Naira</h3>
+            <p>Understands Naira amounts and Nigerian date formats, so 01/07 is read as 1 July, the way your receipts mean it.</p>
+          </div>
+          <div class="card">
+            <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.5" fill="none" stroke="#C6F33D" stroke-width="1.8"/><path d="M11 18h2" stroke="#C6F33D" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+            <h3>Works on any phone</h3>
+            <p>Nothing to install. Open Ledgr in your browser on Android, iPhone or laptop and start scanning.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="who-its-for" aria-labelledby="who-title">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="eyebrow"><span class="dots"><i></i><i></i></span>Who it's for</span>
+          <h2 id="who-title">Made for busy Nigerian businesses</h2>
+          <p>If receipts pile up in a drawer or a WhatsApp chat, Ledgr is for you.</p>
+        </div>
+        <div class="who-grid">
+          <div class="who"><h3>Shops and supermarkets</h3><p>Track stock purchases from every supplier without retyping invoices.</p></div>
+          <div class="who"><h3>Restaurants and food vendors</h3><p>Log market runs and ingredient costs to see what each week really costs.</p></div>
+          <div class="who"><h3>Salons and studios</h3><p>Keep product and equipment spending organised for pricing and tax time.</p></div>
+          <div class="who"><h3>Distributors and wholesalers</h3><p>Capture long order slips line by line, with quantities and unit prices intact.</p></div>
+          <div class="who"><h3>Freelancers and consultants</h3><p>Record business expenses as you go, ready for clients, partners or your accountant.</p></div>
+          <div class="who"><h3>Bookkeepers and accountants</h3><p>Turn a client's bag of receipts into a clean, shareable Google Sheet in minutes.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="benefits" aria-labelledby="benefits-title">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="eyebrow"><span class="dots"><i></i><i></i></span>Benefits</span>
+          <h2 id="benefits-title">Why businesses switch to Ledgr</h2>
+        </div>
+        <div class="benefit-list">
+          <div class="benefit"><div><h3>Save hours of data entry</h3><p>Stop copying receipts into spreadsheets line by line. Upload and move on with your day.</p></div></div>
+          <div class="benefit"><div><h3>Fewer costly typing mistakes</h3><p>Amounts are captured as printed, so a slipped zero no longer throws off your books.</p></div></div>
+          <div class="benefit"><div><h3>Know where your money goes</h3><p>See spending by supplier, item or month, and ask the AI when you need a quick answer.</p></div></div>
+          <div class="benefit"><div><h3>Ready for tax and audits</h3><p>Every receipt is dated, numbered and stored in one place, easy to share with your accountant.</p></div></div>
+          <div class="benefit"><div><h3>Never lose a receipt again</h3><p>Faded thermal paper and lost slips stop being a problem once Ledgr has saved the details.</p></div></div>
+          <div class="benefit"><div><h3>Your data, your sheets</h3><p>Everything lands in your own Google account, so you stay in control of your records.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" aria-labelledby="pricing-title">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="eyebrow"><span class="dots"><i></i><i></i></span>Pricing</span>
+          <h2 id="pricing-title">Simple pricing in Naira</h2>
+          <p>Start free. Upgrade when Ledgr is saving you time.</p>
+        </div>
+        <div class="plans">
+          <div class="plan">
+            <h3>Free</h3>
+            <div class="price">&#8358;0</div>
+            <ul>
+              <li>3 free uses to try Ledgr</li>
+              <li>Read receipts or ask questions</li>
+              <li>Save to Google Sheets</li>
+              <li>No card needed</li>
+            </ul>
+            <a href="/app" class="btn btn-ghost" data-app-cta>Start free</a>
+          </div>
+          <div class="plan pro">
+            <h3>Pro</h3>
+            <div class="price">&#8358;5,000 <small>/ month</small></div>
+            <ul>
+              <li>100 receipts read every month</li>
+              <li>Unlimited questions to the AI</li>
+              <li>Unlimited Google Sheets exports</li>
+              <li>Cancel anytime</li>
+            </ul>
+            <a href="/app" class="btn btn-lime" data-app-cta>Go Pro</a>
+          </div>
+        </div>
+        <p class="pay-note">Pay securely with Paystack by card, bank transfer or USSD.</p>
+      </div>
+    </section>
+
+    <section class="faq" id="faq" aria-labelledby="faq-title">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="eyebrow"><span class="dots"><i></i><i></i></span>FAQ</span>
+          <h2 id="faq-title">Questions about Ledgr</h2>
+        </div>
+        <div class="faq-list">
+          <details open><summary>What is Ledgr?</summary><p>Ledgr is an AI receipt scanner for businesses. You upload a photo or PDF of a receipt, invoice or order slip, and Ledgr reads every line, organises it into a clean table, and saves it to your Google Sheets.</p></details>
+          <details><summary>How do I turn receipts into a Google Sheet?</summary><p>Sign up on Ledgr, upload a receipt photo or PDF, tap Extract information, then tap Send to Google Sheets. Ledgr creates a sheet with a Receipts tab and an Items tab, or adds to a sheet you made with Ledgr before.</p></details>
+          <details><summary>Is Ledgr free?</summary><p>Every account starts with 3 free uses, shared between reading receipts and asking questions. Ledgr Pro costs &#8358;5,000 a month and includes 100 receipts every month plus unlimited questions.</p></details>
+          <details><summary>What kinds of receipts can Ledgr read?</summary><p>Ledgr reads printed shop receipts, POS slips, invoices, supplier bills and order slips, as photos (JPG, PNG, WEBP) or PDFs. Clear, well lit photos give the best results.</p></details>
+          <details><summary>Can Ledgr see my whole Google Drive?</summary><p>No. Ledgr only asks Google for access to files it creates itself, so it can see and edit the sheets made through Ledgr and nothing else in your Drive.</p></details>
+          <details><summary>Does Ledgr work with Naira and Nigerian receipts?</summary><p>Yes. Ledgr is built for Nigerian businesses. It understands Naira amounts and reads dates day first, the way Nigerian receipts print them, and it also handles other currencies.</p></details>
+          <details><summary>How do I pay for Ledgr Pro?</summary><p>Ledgr Pro is paid monthly through Paystack by card, bank transfer or USSD. You can cancel anytime and keep Pro until the end of the month you paid for.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" aria-labelledby="cta-title">
+      <div class="wrap">
+        <div class="cta-box on-dark">
+          <div>
+            <h2 id="cta-title">Your next receipt could be your last one typed by hand</h2>
+            <p>Try Ledgr with 3 free uses. No card needed.</p>
+          </div>
+          <a href="/app" class="btn btn-lime" data-app-cta>Try 3 receipts free</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div>
+        <a href="/" class="wordmark">Ledgr</a>
+        <p style="margin-top:1rem;max-width:22rem">AI receipt scanning and Google Sheets bookkeeping for Nigerian businesses. A product of FocusOnU Growth Consulting.</p>
+      </div>
+      <div>
+        <h3>Product</h3>
+        <ul>
+          <li><a href="#how-it-works">How it works</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Company</h3>
+        <ul>
+          <li><a href="/app" data-app-link>Sign in</a></li>
+          <li><a href="/privacy">Privacy policy</a></li>
+        </ul>
+      </div>
+      <p class="legal">&copy; 2026 Ledgr by FocusOnU Growth Consulting, Abuja, Nigeria.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var btn = document.querySelector(".menu-btn");
+      var menu = document.getElementById("mobile-menu");
+      btn.addEventListener("click", function () {
+        var open = menu.classList.toggle("open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      menu.addEventListener("click", function (e) {
+        if (e.target.tagName === "A") { menu.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
+      });
+      try {
+        var signedIn = Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k); });
+        if (signedIn) {
+          document.querySelectorAll("[data-app-link]").forEach(function (a) { a.textContent = "Open dashboard"; });
+          document.querySelectorAll(".nav [data-app-cta]").forEach(function (a) { a.textContent = "Open dashboard"; });
+        }
+      } catch (e) {}
+    })();
+  </script>
+</body>
 </html>

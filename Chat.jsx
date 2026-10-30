@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase, callFn } from "./supabase.js";
 import { prepareFile } from "./image.js";
-import { renderMarkdown } from "./format.js";
+import { renderMarkdown, money, niceDate } from "./format.js";
 import { Wordmark } from "./App.jsx";
 import ReceiptCard from "./ReceiptCard.jsx";
 import ExtractModal from "./ExtractModal.jsx";
@@ -10,6 +10,26 @@ import UpgradeModal from "./UpgradeModal.jsx";
 
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 const MAX_BYTES = 10 * 1024 * 1024;
+const SUGGESTIONS = [
+  "How much did I spend this month?",
+  "List the items on my latest receipt",
+  "Which supplier do I spend the most with?",
+];
+
+function Sparkle({ size = 18 }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+      <path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" fill="currentColor" />
+      <path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function ClipIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.6-5.6l-8.2 8.2a6 6 0 0 0 8.5 8.5l6.4-6.4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+  );
+}
 
 export default function Chat({ session }) {
   const user = session.user;
@@ -28,6 +48,7 @@ export default function Chat({ session }) {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const fileRef = useRef(null);
   const endRef = useRef(null);
+  const askRef = useRef(null);
 
   const flash = (t) => { setToast(t); setTimeout(() => setToast(""), 4000); };
 
@@ -97,6 +118,22 @@ export default function Chat({ session }) {
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [timeline.length, thinking]);
 
   const sheetTitle = (id) => sheets.find((s) => s.id === id)?.title;
+
+  // Numbers for the overview cards
+  const extracted = receipts.filter((r) => r.status === "extracted");
+  const monthKey = new Date().toISOString().slice(0, 7);
+  const monthSpend = extracted
+    .filter((r) => (!r.currency || r.currency === "NGN") && (r.receipt_date || r.created_at || "").slice(0, 7) === monthKey)
+    .reduce((sum, r) => sum + (Number(r.total) || 0), 0);
+  const recent = [...extracted].reverse().slice(0, 6);
+
+  function focusAsk() {
+    askRef.current?.focus();
+    askRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }
+  function jumpTo(id) {
+    document.getElementById("r-" + id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
   const patchReceipt = (r) => setReceipts((list) => list.map((x) => (x.id === r.id ? { ...x, ...r } : x)));
 
   async function handleFiles(fileList) {
@@ -138,6 +175,11 @@ export default function Chat({ session }) {
         noteUse(free_left);
         done.push(id);
       } catch (e) {
+        if (e.payload?.limit) {
+          ids.slice(ids.indexOf(id)).forEach((rid) => patchReceipt({ id: rid, status: "uploaded", error: null }));
+          flash(e.message);
+          break;
+        }
         if (e.payload?.paywall) {
           // Out of free tries: put the rest back as "not read yet" and show the upgrade screen
           ids.slice(ids.indexOf(id)).forEach((rid) => patchReceipt({ id: rid, status: "uploaded", error: null }));
@@ -148,13 +190,14 @@ export default function Chat({ session }) {
         patchReceipt({ id, status: "failed", error: e.message });
       }
     }
+    loadBilling(); // refresh the counters in the header
     // After results show, prompt to save them to Google Sheets
     if (done.length) setTimeout(() => setSheetFor(done), 600);
   }
 
-  async function send(e) {
+  async function send(e, preset) {
     e?.preventDefault();
-    const text = draft.trim();
+    const text = (preset ?? draft).trim();
     if (!text || thinking) return;
     setDraft("");
     const temp = { id: `temp-${Date.now()}`, role: "user", content: text, created_at: new Date().toISOString() };
@@ -192,18 +235,36 @@ export default function Chat({ session }) {
   }
 
   const firstName = user.user_metadata?.full_name?.split(" ")[0];
+
+  function Overview() {
+    return (
+      <div className="overview">
+        <div className="stat-cards">
+          <div className="stat-card"><span>Receipts</span><b>{extracted.length}</b></div>
+          <div className="stat-card"><span>Spent this month</span><b>{money(monthSpend, "NGN")}</b></div>
+          <div className="stat-card"><span>Sheets</span><b>{sheets.length}</b></div>
+        </div>
+        <div className="quick">
+          <button className="quick-btn" onClick={() => fileRef.current?.click()} disabled={uploading}>
+            <ClipIcon /> Upload receipt
+          </button>
+          <button className="quick-btn quick-ask" onClick={focusAsk}>
+            <Sparkle /> Ask AI about receipts
+          </button>
+        </div>
+      </div>
+    );
+  }
   const empty = !loading && timeline.length === 0;
 
   return (
     <div className="app">
       <header className="topbar">
         <Wordmark small />
-        {billing && (
-          billing.pro
-            ? <span className="plan-chip plan-pro">Pro</span>
-            : <button className={`plan-chip ${billing.free_left === 0 ? "plan-out" : ""}`} onClick={() => setUpgradeOpen(true)}>
-                {billing.free_left > 0 ? `${billing.free_left} of ${billing.free_limit} free left` : "Upgrade"}
-              </button>
+        {billing?.pro && (
+          <span className="plan-chip plan-pro">
+            {billing.owner ? "Owner" : "Pro: " + Math.max(billing.pro_limit - billing.pro_used, 0) + " left"}
+          </span>
         )}
         <div className="menu-wrap">
           <button className="icon-btn" aria-label="Account menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((o) => !o)}>
@@ -222,62 +283,113 @@ export default function Chat({ session }) {
         </div>
       </header>
 
-      <main className="feed" aria-live="polite">
-        {loading && <p className="muted center">Loading your receipts…</p>}
+      {billing && !billing.pro && (
+        <div className="pro-banner">
+          <span>
+            <strong>{billing.free_left > 0 ? billing.free_left + " of " + billing.free_limit + " free tries left." : "Free tries used up."}</strong>{" "}
+            Go Pro: 100 receipts a month for ₦5,000.
+          </span>
+          <button className="btn btn-primary btn-sm" onClick={() => setUpgradeOpen(true)}>Go Pro</button>
+        </div>
+      )}
 
-        {empty && (
-          <section className="empty">
-            <h1>{firstName ? `Hi ${firstName}.` : "Hi there."} Let's tidy up some receipts.</h1>
-            <p>Upload a photo or PDF of a receipt. Ledgr reads it, lays it out in a clean table, and saves it to Google Sheets.</p>
-            <button className="btn btn-primary btn-lg" onClick={() => fileRef.current?.click()}>Upload a receipt</button>
-            <p className="muted small">Later, ask things like “How much did I spend at Shoprite this month?”</p>
-          </section>
-        )}
-
-        {timeline.map((item) =>
-          item.kind === "receipt" ? (
-            <div className="row row-receipt" key={`r-${item.data.id}`}>
-              <ReceiptCard
-                receipt={item.data}
-                sheetTitle={sheetTitle(item.data.sheet_id)}
-                onExtract={(ids) => extract(ids)}
-                onSendToSheets={(ids) => setSheetFor(ids)}
-              />
+      <div className="workspace">
+        <aside className="side side-desktop" aria-label="Overview">
+          <Overview />
+          {recent.length > 0 && (
+            <div className="recent">
+              <h2>Recent receipts</h2>
+              <ul>
+                {recent.map((r) => (
+                  <li key={r.id}>
+                    <button onClick={() => jumpTo(r.id)}>
+                      <span className="recent-name">{r.merchant || r.file_name || "Receipt"}</span>
+                      <span className="recent-meta">{niceDate(r.receipt_date)}{r.total != null ? " · " + money(r.total, r.currency) : ""}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ) : (
-            <div className={`row row-${item.data.role}`} key={`m-${item.data.id}`}>
-              {item.data.role === "assistant"
-                ? <div className={`bubble bubble-ai ${item.data.error ? "bubble-error" : ""}`}
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(item.data.content) }} />
-                : <div className="bubble bubble-user">{item.data.content}</div>}
-            </div>
-          )
-        )}
-
-        {thinking && <div className="row row-assistant"><div className="bubble bubble-ai typing"><span /><span /><span /></div></div>}
-        <div ref={endRef} />
-      </main>
-
-      <form className="composer" onSubmit={send}>
-        <input ref={fileRef} type="file" accept={ACCEPT} multiple hidden onChange={(e) => handleFiles(e.target.files)} />
-        <button type="button" className="icon-btn attach" aria-label="Upload receipt" disabled={uploading}
-          onClick={() => fileRef.current?.click()}>
-          {uploading ? <span className="spinner" /> : (
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M16.5 6.5 8.4 14.6a2 2 0 0 0 2.8 2.8l8.1-8.1a4 4 0 0 0-5.6-5.6l-8.2 8.2a6 6 0 0 0 8.5 8.5l6.4-6.4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
           )}
-        </button>
-        <textarea
-          rows={1}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && window.matchMedia("(pointer:fine)").matches) { e.preventDefault(); send(); } }}
-          placeholder="Ask about your receipts…"
-          aria-label="Message"
-        />
-        <button className="icon-btn send" aria-label="Send" disabled={!draft.trim() || thinking}>
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </button>
-      </form>
+        </aside>
+
+        <div className="main-col">
+          <main className="feed" aria-live="polite">
+            <div className="side-mobile"><Overview /></div>
+
+            {loading && <p className="muted center">Loading your receipts…</p>}
+
+            {empty && (
+              <section className="empty">
+                <h1>{firstName ? "Hi " + firstName + "." : "Hi there."} Let's tidy up some receipts.</h1>
+                <ol className="empty-steps">
+                  <li><b>Upload</b> a photo or PDF of a receipt</li>
+                  <li><b>Extract</b> and check the clean table</li>
+                  <li><b>Save</b> it to Google Sheets, then <b>ask AI</b> anything about it</li>
+                </ol>
+                <button className="btn btn-primary btn-lg" onClick={() => fileRef.current?.click()}>Upload a receipt</button>
+              </section>
+            )}
+
+            {timeline.map((item) =>
+              item.kind === "receipt" ? (
+                <div className="row row-receipt" key={"r-" + item.data.id} id={"r-" + item.data.id}>
+                  <ReceiptCard
+                    receipt={item.data}
+                    sheetTitle={sheetTitle(item.data.sheet_id)}
+                    onExtract={(ids) => extract(ids)}
+                    onSendToSheets={(ids) => setSheetFor(ids)}
+                  />
+                </div>
+              ) : (
+                <div className={"row row-" + item.data.role} key={"m-" + item.data.id}>
+                  {item.data.role === "assistant"
+                    ? <div className={"bubble bubble-ai " + (item.data.error ? "bubble-error" : "")}>
+                        <span className="ai-label"><Sparkle size={14} /> Ledgr AI</span>
+                        <div dangerouslySetInnerHTML={{ __html: renderMarkdown(item.data.content) }} />
+                      </div>
+                    : <div className="bubble bubble-user">{item.data.content}</div>}
+                </div>
+              )
+            )}
+
+            {thinking && <div className="row row-assistant"><div className="bubble bubble-ai typing"><span /><span /><span /></div></div>}
+            <div ref={endRef} />
+          </main>
+
+          <div className="ask-bar">
+            {!draft && !thinking && extracted.length > 0 && (
+              <div className="suggestions" aria-label="Suggested questions">
+                {SUGGESTIONS.map((q) => (
+                  <button key={q} className="chip" onClick={() => send(null, q)}><Sparkle size={13} /> {q}</button>
+                ))}
+              </div>
+            )}
+            <form className="composer" onSubmit={send}>
+              <input ref={fileRef} type="file" accept={ACCEPT} multiple hidden onChange={(e) => handleFiles(e.target.files)} />
+              <button type="button" className="icon-btn attach" aria-label="Upload receipt" title="Upload receipt" disabled={uploading}
+                onClick={() => fileRef.current?.click()}>
+                {uploading ? <span className="spinner" /> : <ClipIcon />}
+              </button>
+              <label className="ask-field">
+                <span className="ask-icon"><Sparkle /></span>
+                <textarea
+                  ref={askRef}
+                  rows={1}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && window.matchMedia("(pointer:fine)").matches) { e.preventDefault(); send(); } }}
+                  placeholder="Ask AI about your receipts…"
+                  aria-label="Ask AI about your receipts"
+                />
+              </label>
+              <button className="icon-btn send" aria-label="Send" disabled={!draft.trim() || thinking}>
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
 
       {toast && <div className="toast" role="status">{toast}</div>}
 
@@ -285,7 +397,7 @@ export default function Chat({ session }) {
         <ExtractModal count={extractFor.length} onLater={() => setExtractFor(null)}
           onExtract={(instructions) => extract(extractFor, instructions)} />
       )}
-      {upgradeOpen && <UpgradeModal onClose={() => setUpgradeOpen(false)} />}
+      {upgradeOpen && <UpgradeModal onClose={() => setUpgradeOpen(false)} reason={billing?.free_left === 0 ? "You've used your 3 free tries." : ""} />}
       {sheetFor && (
         <SheetModal receiptIds={sheetFor} onClose={() => setSheetFor(null)}
           onDone={(sheet) => {

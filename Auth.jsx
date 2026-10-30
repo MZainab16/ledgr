@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "./supabase.js";
 import { Wordmark } from "./App.jsx";
+import PasswordInput from "./PasswordInput.jsx";
 
 export default function Auth() {
   const [mode, setMode] = useState("signin"); // signin | signup | reset
@@ -18,7 +19,7 @@ export default function Auth() {
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email, password,
-          options: { data: { full_name: name }, emailRedirectTo: window.location.origin },
+          options: { data: { full_name: name }, emailRedirectTo: window.location.origin + "/app" },
         });
         if (error) throw error;
         if (!data.session) setNotice("Check your email and tap the link to confirm your account.");
@@ -26,7 +27,7 @@ export default function Auth() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/app" });
         if (error) throw error;
         setNotice("If that email has an account, a reset link is on its way.");
       }
@@ -57,8 +58,8 @@ export default function Auth() {
         </label>
         {mode !== "reset" && (
           <label>Password
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"} minLength={8} required />
+            <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"} />
           </label>
         )}
 

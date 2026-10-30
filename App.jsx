@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "./supabase.js";
 import Auth from "./Auth.jsx";
 import Chat from "./Chat.jsx";
+import PasswordInput from "./PasswordInput.jsx";
 
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = still checking
@@ -42,7 +43,7 @@ function NewPassword({ onDone }) {
       <form className="auth-form" onSubmit={save}>
         <h1>Choose a new password</h1>
         <label>New password
-          <input type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required />
+          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
         </label>
         {error && <p className="msg-error" role="alert">{error}</p>}
         <button className="btn btn-primary btn-block" disabled={busy}>{busy ? "Saving…" : "Save password"}</button>
