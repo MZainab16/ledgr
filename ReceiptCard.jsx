@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase.js";
 import { money, niceDate } from "./format.js";
+import { downloadExcel } from "./records.js";
 
 
 export default function ReceiptCard({ receipt, onExtract, onSendToSheets, sheetTitle }) {
   const [thumb, setThumb] = useState(null);
+  const [downloading, setDownloading] = useState(false);
   const x = receipt.extracted;
   const isImage = receipt.mime_type?.startsWith("image/");
 
@@ -25,11 +27,11 @@ export default function ReceiptCard({ receipt, onExtract, onSendToSheets, sheetT
           ? <img className="receipt-thumb" src={thumb} alt="" />
           : <div className="receipt-thumb receipt-thumb-file" aria-hidden="true">{isImage ? "" : "PDF"}</div>}
         <div className="receipt-id">
-          <strong>{receipt.merchant || receipt.file_name || "Receipt"}</strong>
+          <strong>{receipt.merchant || receipt.file_name || "Record"}</strong>
           <span>
-            {receipt.status === "extracted" && (niceDate(receipt.receipt_date) || "No date found")}
+            {receipt.status === "extracted" && (niceDate(receipt.receipt_date) || "No date on record")}
             {receipt.status === "uploaded" && "Uploaded, not read yet"}
-            {receipt.status === "extracting" && "Reading receipt…"}
+            {receipt.status === "extracting" && "Reading record…"}
             {receipt.status === "failed" && "Couldn't read this one"}
           </span>
         </div>
@@ -61,7 +63,7 @@ export default function ReceiptCard({ receipt, onExtract, onSendToSheets, sheetT
           )}
 
           {x.columns?.length > 0 && (
-            <div className="table-wrap" tabIndex={0} aria-label="Line items">
+            <div className="table-wrap" tabIndex={0} aria-label="Record table">
               <table className="ledger">
                 <thead><tr>{x.columns.map((c, i) => <th key={i}>{c}</th>)}</tr></thead>
                 <tbody>
@@ -81,14 +83,21 @@ export default function ReceiptCard({ receipt, onExtract, onSendToSheets, sheetT
           )}
 
           {x.confidence === "low" && (
-            <p className="msg-warn">Some parts were hard to read. Please double check the numbers.</p>
+            <p className="msg-warn">Some entries were hard to read. Please double check them.</p>
           )}
-          {x.notes && <p className="receipt-notes">{x.notes}</p>}
+          {x.notes && <p className="receipt-notes"><strong>Notes:</strong> {x.notes}</p>}
 
           <div className="receipt-actions">
             {receipt.exported_at && sheetTitle
               ? <span className="saved-chip">Saved to “{sheetTitle}”</span>
               : null}
+            <button className="btn" disabled={downloading} onClick={async () => {
+              setDownloading(true);
+              try { await downloadExcel([receipt], (receipt.merchant || "Ledgr record") + (receipt.receipt_date ? " " + receipt.receipt_date : "")); }
+              finally { setDownloading(false); }
+            }}>
+              {downloading ? "Preparing…" : "Download Excel"}
+            </button>
             <button className="btn btn-primary" onClick={() => onSendToSheets([receipt.id])}>
               {receipt.exported_at ? "Send again" : "Send to Google Sheets"}
             </button>

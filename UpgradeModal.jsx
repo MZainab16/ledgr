@@ -16,17 +16,17 @@ export default function UpgradeModal({ onClose, reason }) {
 
   return (
     <Modal title="Upgrade to Ledgr Pro" onClose={onClose}>
-      <p>{reason ? reason + " " : ""}Pro gives you 100 receipts and 50 AI questions every month for ₦5,000.</p>
+      <p>{reason ? reason + " " : ""}Pro gives you 100 records and 50 AI questions every month for ₦5,000.</p>
       <div className="price-card">
         <div className="price-line"><span className="price-amount">₦5,000</span><span className="muted">/month</span></div>
         <ul className="perks">
-          <li>100 receipts read every month</li>
-          <li>50 AI questions about your receipts every month</li>
-          <li>Send to Google Sheets anytime</li>
+          <li>100 records read every month</li>
+          <li>50 AI questions about your records every month</li>
+          <li>Google Sheets and Excel exports anytime</li>
           <li>Cancel anytime</li>
         </ul>
       </div>
-      <p className="muted small">Payments are processed securely by Paystack for FocusOnU Growth Consulting, the company behind Ledgr. Pay by card, bank transfer or USSD. Renews monthly. See our <a href="/terms" target="_blank" rel="noopener">Terms</a>.</p>
+      <p className="muted small">Payments are processed securely by Paystack for FocusOnU Growth Consulting, the company behind Ledgr. Pay by card. Renews monthly, cancel anytime. See our <a href="/terms" target="_blank" rel="noopener">Terms</a>.</p>
       {error && <p className="msg-error" role="alert">{error}</p>}
       <div className="modal-actions">
         <button className="btn" onClick={onClose}>Not now</button>

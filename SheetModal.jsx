@@ -15,7 +15,7 @@ export function takePending() {
 export default function SheetModal({ receiptIds, onClose, onDone }) {
   const [status, setStatus] = useState(null); // { connected, email, sheets }
   const [mode, setMode] = useState("new");
-  const [title, setTitle] = useState(`Receipts ${new Date().toLocaleDateString("en-NG", { month: "long", year: "numeric" })}`);
+  const [title, setTitle] = useState(`Ledgr records ${new Date().toLocaleDateString("en-NG", { month: "long", year: "numeric" })}`);
   const [sheetId, setSheetId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -63,7 +63,7 @@ export default function SheetModal({ receiptIds, onClose, onDone }) {
 
       {result && (
         <>
-          <p>{result.count > 1 ? `${result.count} receipts were` : "Your receipt was"} added to <strong>{result.sheet.title}</strong>.</p>
+          <p>{result.count > 1 ? `${result.count} records were` : "Your record was"} added to <strong>{result.sheet.title}</strong>.</p>
           <div className="modal-actions">
             <button className="btn" onClick={onClose}>Done</button>
             <a className="btn btn-primary" href={result.sheet.url} target="_blank" rel="noreferrer">Open sheet</a>
@@ -85,7 +85,7 @@ export default function SheetModal({ receiptIds, onClose, onDone }) {
 
       {!result && status?.connected && (
         <>
-          <p className="muted">Connected as {status.email || "your Google account"}. Sending {count} receipt{count > 1 ? "s" : ""}.</p>
+          <p className="muted">Connected as {status.email || "your Google account"}. Sending {count} record{count > 1 ? "s" : ""}. Each layout gets its own tab, using your record's own column titles.</p>
           <div className="segmented" role="tablist">
             <button role="tab" aria-selected={mode === "new"} className={mode === "new" ? "on" : ""} onClick={() => setMode("new")}>New sheet</button>
             <button role="tab" aria-selected={mode === "existing"} className={mode === "existing" ? "on" : ""}

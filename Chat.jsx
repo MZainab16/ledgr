@@ -5,6 +5,7 @@ import { renderMarkdown, money, niceDate } from "./format.js";
 import { Wordmark } from "./App.jsx";
 import ReceiptCard from "./ReceiptCard.jsx";
 import ExtractModal from "./ExtractModal.jsx";
+import { downloadExcel } from "./records.js";
 import SheetModal, { takePending } from "./SheetModal.jsx";
 import UpgradeModal from "./UpgradeModal.jsx";
 import FeedbackModal from "./FeedbackModal.jsx";
@@ -12,9 +13,9 @@ import FeedbackModal from "./FeedbackModal.jsx";
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 const MAX_BYTES = 10 * 1024 * 1024;
 const SUGGESTIONS = [
-  "How much did I spend this month?",
-  "List the items on my latest receipt",
-  "Which supplier do I spend the most with?",
+  "Summarise my latest record",
+  "Total the amounts in my latest record",
+  "What records did I upload this week?",
 ];
 
 function Sparkle({ size = 18 }) {
@@ -84,7 +85,7 @@ export default function Chat({ session }) {
     callFn("billing", { action: "verify", reference })
       .then((b) => {
         setBilling(b);
-        flash(b.verified ? "Welcome to Ledgr Pro! Unlimited receipts unlocked." : "Payment not completed.");
+        flash(b.verified ? "Welcome to Ledgr Pro! 100 records a month unlocked." : "Payment not completed.");
       })
       .catch((e) => flash(e.message));
   }, []);
@@ -124,9 +125,7 @@ export default function Chat({ session }) {
   // Numbers for the overview cards
   const extracted = receipts.filter((r) => r.status === "extracted");
   const monthKey = new Date().toISOString().slice(0, 7);
-  const monthSpend = extracted
-    .filter((r) => (!r.currency || r.currency === "NGN") && (r.receipt_date || r.created_at || "").slice(0, 7) === monthKey)
-    .reduce((sum, r) => sum + (Number(r.total) || 0), 0);
+  const monthCount = extracted.filter((r) => (r.created_at || "").slice(0, 7) === monthKey).length;
   const recent = [...extracted].reverse().slice(0, 6);
 
   function focusAsk() {
@@ -246,24 +245,24 @@ export default function Chat({ session }) {
   const questionsLeft = billing?.chat_limit != null ? Math.max(billing.chat_limit - (billing.chat_used ?? 0), 0) : null;
   const upgradeReason = questionsLeft === 0
     ? "You've used this month's free AI questions."
-    : billing?.free_left === 0 ? "You've used your 3 free receipts." : "";
+    : billing?.free_left === 0 ? "You've used your 3 free records." : "";
 
   function Overview() {
     return (
       <div className="overview">
         <div className="stat-cards">
-          <div className="stat-card"><span>Receipts</span><b>{extracted.length}</b></div>
-          <div className="stat-card"><span>Spent this month</span><b>{money(monthSpend, "NGN")}</b></div>
+          <div className="stat-card"><span>Records</span><b>{extracted.length}</b></div>
+          <div className="stat-card"><span>Added this month</span><b>{monthCount}</b></div>
           {questionsLeft != null
             ? <div className="stat-card"><span>AI questions left</span><b>{questionsLeft}</b></div>
             : <div className="stat-card"><span>Sheets</span><b>{sheets.length}</b></div>}
         </div>
         <div className="quick">
           <button className="quick-btn" onClick={() => fileRef.current?.click()} disabled={uploading}>
-            <ClipIcon /> Upload receipt
+            <ClipIcon /> Upload record
           </button>
           <button className="quick-btn quick-ask" onClick={focusAsk}>
-            <Sparkle /> Ask AI about receipts
+            <Sparkle /> Ask AI about records
           </button>
         </div>
       </div>
@@ -279,7 +278,7 @@ export default function Chat({ session }) {
           <span className="plan-chip plan-pro">
             {billing.owner
               ? "Owner"
-              : "Pro: " + Math.max(billing.pro_limit - billing.pro_used, 0) + " receipts" +
+              : "Pro: " + Math.max(billing.pro_limit - billing.pro_used, 0) + " records" +
                 (billing.chat_limit != null ? ", " + Math.max(billing.chat_limit - (billing.chat_used ?? 0), 0) + " questions" : "")}
           </span>
         )}
@@ -297,6 +296,7 @@ export default function Chat({ session }) {
               {billing?.pro
                 ? <button role="menuitem" onClick={manageSubscription}>Manage subscription</button>
                 : <button role="menuitem" onClick={() => { setMenuOpen(false); setUpgradeOpen(true); }}>Upgrade to Pro</button>}
+              <button role="menuitem" disabled={!extracted.length} onClick={() => { setMenuOpen(false); downloadExcel(extracted, "Ledgr records " + new Date().toISOString().slice(0, 10)); }}>Download all as Excel</button>
               <button role="menuitem" onClick={() => { setMenuOpen(false); setFeedbackOpen(true); }}>Send feedback</button>
               <button role="menuitem" onClick={disconnectGoogle}>Disconnect Google</button>
               <button role="menuitem" onClick={() => supabase.auth.signOut()}>Sign out</button>
@@ -309,10 +309,10 @@ export default function Chat({ session }) {
         <div className="pro-banner">
           <span>
             <strong>
-              {"Free: " + billing.free_left + " of " + billing.free_limit + " receipts"}
+              {"Free: " + billing.free_left + " of " + billing.free_limit + " records"}
               {billing.chat_limit != null ? ", " + Math.max(billing.chat_limit - (billing.chat_used ?? 0), 0) + " of " + billing.chat_limit + " questions left." : " left."}
             </strong>{" "}
-            Go Pro: 100 receipts and 50 questions a month for ₦5,000.
+            Go Pro: 100 records and 50 questions a month for ₦5,000.
           </span>
           <button className="btn btn-primary btn-sm" onClick={() => setUpgradeOpen(true)}>Go Pro</button>
         </div>
@@ -323,13 +323,13 @@ export default function Chat({ session }) {
           <Overview />
           {recent.length > 0 && (
             <div className="recent">
-              <h2>Recent receipts</h2>
+              <h2>Recent records</h2>
               <ul>
                 {recent.map((r) => (
                   <li key={r.id}>
                     <button onClick={() => jumpTo(r.id)}>
-                      <span className="recent-name">{r.merchant || r.file_name || "Receipt"}</span>
-                      <span className="recent-meta">{niceDate(r.receipt_date)}{r.total != null ? " · " + money(r.total, r.currency) : ""}</span>
+                      <span className="recent-name">{r.merchant || r.file_name || "Record"}</span>
+                      <span className="recent-meta">{niceDate(r.receipt_date) || "No date"}{r.extracted?.rows?.length ? " · " + r.extracted.rows.length + " rows" : ""}</span>
                     </button>
                   </li>
                 ))}
@@ -342,17 +342,17 @@ export default function Chat({ session }) {
           <main className="feed" aria-live="polite">
             <div className="side-mobile"><Overview /></div>
 
-            {loading && <p className="muted center">Loading your receipts…</p>}
+            {loading && <p className="muted center">Loading your records…</p>}
 
             {empty && (
               <section className="empty">
-                <h1>{firstName ? "Hi " + firstName + "." : "Hi there."} Let's tidy up some receipts.</h1>
+                <h1>{firstName ? "Hi " + firstName + "." : "Hi there."} Let's turn your records into spreadsheets.</h1>
                 <ol className="empty-steps">
-                  <li><b>Upload</b> a photo or PDF of a receipt</li>
-                  <li><b>Extract</b> and check the clean table</li>
-                  <li><b>Save</b> it to Google Sheets, then <b>ask AI</b> anything about it</li>
+                  <li><b>Upload</b> a photo or PDF of any record: a receipt, a handwritten sales book, a list</li>
+                  <li><b>Extract</b> it. Ledgr copies every entry exactly as written</li>
+                  <li><b>Save</b> it to Google Sheets or <b>download Excel</b>, then <b>ask AI</b> about it</li>
                 </ol>
-                <button className="btn btn-primary btn-lg" onClick={() => fileRef.current?.click()}>Upload a receipt</button>
+                <button className="btn btn-primary btn-lg" onClick={() => fileRef.current?.click()}>Upload a record</button>
               </section>
             )}
 
@@ -392,7 +392,7 @@ export default function Chat({ session }) {
             )}
             <form className="composer" onSubmit={send}>
               <input ref={fileRef} type="file" accept={ACCEPT} multiple hidden onChange={(e) => handleFiles(e.target.files)} />
-              <button type="button" className="icon-btn attach" aria-label="Upload receipt" title="Upload receipt" disabled={uploading}
+              <button type="button" className="icon-btn attach" aria-label="Upload record" title="Upload record" disabled={uploading}
                 onClick={() => fileRef.current?.click()}>
                 {uploading ? <span className="spinner" /> : <ClipIcon />}
               </button>
@@ -404,8 +404,8 @@ export default function Chat({ session }) {
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && window.matchMedia("(pointer:fine)").matches) { e.preventDefault(); send(); } }}
-                  placeholder="Ask AI about your receipts…"
-                  aria-label="Ask AI about your receipts"
+                  placeholder="Ask AI about your records…"
+                  aria-label="Ask AI about your records"
                 />
               </label>
               <button className="icon-btn send" aria-label="Send" disabled={!draft.trim() || thinking}>
