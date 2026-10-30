@@ -381,3 +381,11 @@ input:focus, textarea:focus { border-color: var(--ledger); outline: none; }
 @media (prefers-color-scheme: dark) {
   .quick-ask { background: #C6F33D; color: #10251C; }
 }
+
+
+/* Logo mark next to the name, and legal links */
+.wordmark { display: inline-flex; align-items: center; gap: .5rem; border-bottom: 0; padding-bottom: 0; text-decoration: none; color: inherit; }
+.wordmark .logo-mark { width: 1.3em; height: 1.3em; flex: none; }
+.wordmark-sm .logo-mark { width: 30px; height: 30px; }
+.legal-note { font-size: .85rem; color: var(--muted); margin: 0; }
+.legal-note a, .auth-foot a { color: var(--ledger); font-weight: 600; }

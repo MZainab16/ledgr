@@ -8,6 +8,7 @@
   <link rel="canonical" href="https://useledgr.com.ng/" />
   <meta name="theme-color" content="#163A2C" />
   <link rel="icon" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Ledgr" />
@@ -15,6 +16,7 @@
   <meta property="og:description" content="Snap a receipt. Ledgr's AI reads every line and saves it to Google Sheets. Built for Nigerian businesses. Try 3 receipts free." />
   <meta property="og:url" content="https://useledgr.com.ng/" />
   <meta property="og:locale" content="en_NG" />
+  <meta property="og:image" content="https://useledgr.com.ng/logo-512.png" />
   <meta name="twitter:card" content="summary" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -39,6 +41,7 @@
         "@id": "https://useledgr.com.ng/#org",
         "name": "Ledgr",
         "url": "https://useledgr.com.ng/",
+        "logo": "https://useledgr.com.ng/logo-512.png",
         "parentOrganization": { "@type": "Organization", "name": "FocusOnU Growth Consulting" },
         "areaServed": "NG"
       },
@@ -51,8 +54,8 @@
         "description": "Ledgr is an AI receipt scanner that reads receipts, invoices and order slips and saves the details to Google Sheets, with an AI assistant that answers questions about your receipts.",
         "publisher": { "@id": "https://useledgr.com.ng/#org" },
         "offers": [
-          { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "NGN", "description": "3 free uses to try Ledgr" },
-          { "@type": "Offer", "name": "Pro", "price": "5000", "priceCurrency": "NGN", "description": "100 receipts every month and unlimited AI questions, billed monthly" }
+          { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "NGN", "description": "3 free receipts and 20 AI questions a month" },
+          { "@type": "Offer", "name": "Pro", "price": "5000", "priceCurrency": "NGN", "description": "100 receipts and 50 AI questions every month, billed monthly" }
         ]
       },
       {
@@ -60,7 +63,7 @@
         "mainEntity": [
           { "@type": "Question", "name": "What is Ledgr?", "acceptedAnswer": { "@type": "Answer", "text": "Ledgr is an AI receipt scanner for businesses. You upload a photo or PDF of a receipt, invoice or order slip, and Ledgr reads every line, organises it into a clean table, and saves it to your Google Sheets." } },
           { "@type": "Question", "name": "How do I turn receipts into a Google Sheet?", "acceptedAnswer": { "@type": "Answer", "text": "Sign up on Ledgr, upload a receipt photo or PDF, tap Extract information, then tap Send to Google Sheets. Ledgr creates a sheet with a Receipts tab and an Items tab, or adds to a sheet you made with Ledgr before." } },
-          { "@type": "Question", "name": "Is Ledgr free?", "acceptedAnswer": { "@type": "Answer", "text": "Every account starts with 3 free uses, shared between reading receipts and asking questions. Ledgr Pro costs 5,000 Naira a month and includes 100 receipts every month plus unlimited questions." } },
+          { "@type": "Question", "name": "Is Ledgr free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, you can start free. Every account gets 3 free receipts and 20 AI questions a month. Ledgr Pro costs 5,000 Naira a month and includes 100 receipts and 50 AI questions every month." } },
           { "@type": "Question", "name": "What kinds of receipts can Ledgr read?", "acceptedAnswer": { "@type": "Answer", "text": "Ledgr reads printed shop receipts, POS slips, invoices, supplier bills and order slips, as photos (JPG, PNG, WEBP) or PDFs. Clear, well lit photos give the best results." } },
           { "@type": "Question", "name": "Can Ledgr see my whole Google Drive?", "acceptedAnswer": { "@type": "Answer", "text": "No. Ledgr only asks Google for access to files it creates itself, so it can see and edit the sheets made through Ledgr and nothing else in your Drive." } },
           { "@type": "Question", "name": "Does Ledgr work with Naira and Nigerian receipts?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Ledgr is built for Nigerian businesses. It understands Naira amounts and reads dates day first, the way Nigerian receipts print them, and it also handles other currencies." } },
@@ -92,7 +95,8 @@
     .dots i { width: 14px; height: 14px; border-radius: 50%; background: #C6F33D; display: block; }
     .dots i + i { background: #163A2C; margin-left: -5px; }
     .on-dark .dots i + i { background: #F4F6F1; }
-    .wordmark { font-weight: 800; letter-spacing: -0.04em; font-size: 1.6rem; text-decoration: none; padding-bottom: 2px; border-bottom: 5px double #C6F33D; }
+    .wordmark { display: inline-flex; align-items: center; gap: .55rem; font-weight: 800; letter-spacing: -0.04em; font-size: 1.55rem; text-decoration: none; }
+    .wordmark svg { width: 38px; height: 38px; flex: none; }
 
     .topbar { background: #163A2C; color: #DDE7DF; font-size: .85rem; }
     .topbar .wrap { display: flex; justify-content: space-between; align-items: center; min-height: 40px; gap: 1rem; }
@@ -271,7 +275,7 @@
 
   <header class="nav">
     <div class="wrap">
-      <a href="/" class="wordmark" aria-label="Ledgr home">Ledgr</a>
+      <a href="/" class="wordmark" aria-label="Ledgr home"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#163A2C"/><rect x="160" y="104" width="70" height="230" rx="10" fill="#FFFFFF"/><rect x="160" y="268" width="192" height="66" rx="10" fill="#FFFFFF"/><rect x="160" y="362" width="192" height="16" rx="8" fill="#C6F33D"/><rect x="160" y="394" width="192" height="16" rx="8" fill="#C6F33D"/></svg>Ledgr</a>
       <nav aria-label="Main">
         <ul>
           <li><a href="#how-it-works">How it works</a></li>
@@ -398,10 +402,10 @@
           </div>
         </div>
         <div class="stats">
-          <div class="stat"><b>3</b><span>Free uses to try Ledgr</span></div>
+          <div class="stat"><b>3</b><span>Free receipts to try Ledgr</span></div>
           <div class="stat"><b>100</b><span>Receipts a month on Pro</span></div>
           <div class="stat"><b>&#8358;5,000</b><span>Pro plan, per month</span></div>
-          <div class="stat"><b>0</b><span>Rows typed by hand</span></div>
+          <div class="stat"><b>50</b><span>AI questions a month on Pro</span></div>
         </div>
       </div>
     </section>
@@ -512,8 +516,8 @@
             <h3>Free</h3>
             <div class="price">&#8358;0</div>
             <ul>
-              <li>3 free uses to try Ledgr</li>
-              <li>Read receipts or ask questions</li>
+              <li>3 free receipts to try Ledgr</li>
+              <li>20 AI questions every month</li>
               <li>Save to Google Sheets</li>
               <li>No card needed</li>
             </ul>
@@ -524,14 +528,14 @@
             <div class="price">&#8358;5,000 <small>/ month</small></div>
             <ul>
               <li>100 receipts read every month</li>
-              <li>Unlimited questions to the AI</li>
+              <li>50 AI questions every month</li>
               <li>Unlimited Google Sheets exports</li>
               <li>Cancel anytime</li>
             </ul>
             <a href="/app?mode=signup" class="btn btn-lime">Go Pro</a>
           </div>
         </div>
-        <p class="pay-note">Pay securely with Paystack by card, bank transfer or USSD.</p>
+        <p class="pay-note">Pay securely with Paystack by card, bank transfer or USSD. Monthly allowances reset on the 1st and do not roll over. See our <a href="/terms">Terms of Service</a>.</p>
       </div>
     </section>
 
@@ -544,7 +548,7 @@
         <div class="faq-list">
           <details open><summary>What is Ledgr?</summary><p>Ledgr is an AI receipt scanner for businesses. You upload a photo or PDF of a receipt, invoice or order slip, and Ledgr reads every line, organises it into a clean table, and saves it to your Google Sheets.</p></details>
           <details><summary>How do I turn receipts into a Google Sheet?</summary><p>Sign up on Ledgr, upload a receipt photo or PDF, tap Extract information, then tap Send to Google Sheets. Ledgr creates a sheet with a Receipts tab and an Items tab, or adds to a sheet you made with Ledgr before.</p></details>
-          <details><summary>Is Ledgr free?</summary><p>Every account starts with 3 free uses, shared between reading receipts and asking questions. Ledgr Pro costs &#8358;5,000 a month and includes 100 receipts every month plus unlimited questions.</p></details>
+          <details><summary>Is Ledgr free?</summary><p>Yes, you can start free. Every account gets 3 free receipts and 20 AI questions a month. Ledgr Pro costs &#8358;5,000 a month and includes 100 receipts and 50 AI questions every month.</p></details>
           <details><summary>What kinds of receipts can Ledgr read?</summary><p>Ledgr reads printed shop receipts, POS slips, invoices, supplier bills and order slips, as photos (JPG, PNG, WEBP) or PDFs. Clear, well lit photos give the best results.</p></details>
           <details><summary>Can Ledgr see my whole Google Drive?</summary><p>No. Ledgr only asks Google for access to files it creates itself, so it can see and edit the sheets made through Ledgr and nothing else in your Drive.</p></details>
           <details><summary>Does Ledgr work with Naira and Nigerian receipts?</summary><p>Yes. Ledgr is built for Nigerian businesses. It understands Naira amounts and reads dates day first, the way Nigerian receipts print them, and it also handles other currencies.</p></details>
@@ -558,7 +562,7 @@
         <div class="cta-box on-dark">
           <div>
             <h2 id="cta-title">Your next receipt could be your last one typed by hand</h2>
-            <p>Try Ledgr with 3 free uses. No card needed.</p>
+            <p>Try Ledgr with 3 free receipts. No card needed.</p>
           </div>
           <a href="/app?mode=signup" class="btn btn-lime">Try 3 receipts free</a>
         </div>
@@ -569,7 +573,7 @@
   <footer>
     <div class="wrap">
       <div>
-        <a href="/" class="wordmark">Ledgr</a>
+        <a href="/" class="wordmark"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#163A2C"/><rect x="160" y="104" width="70" height="230" rx="10" fill="#FFFFFF"/><rect x="160" y="268" width="192" height="66" rx="10" fill="#FFFFFF"/><rect x="160" y="362" width="192" height="16" rx="8" fill="#C6F33D"/><rect x="160" y="394" width="192" height="16" rx="8" fill="#C6F33D"/></svg>Ledgr</a>
         <p style="margin-top:1rem;max-width:22rem">AI receipt scanning and Google Sheets bookkeeping for Nigerian businesses. A product of FocusOnU Growth Consulting.</p>
       </div>
       <div>
@@ -585,10 +589,12 @@
         <h3>Company</h3>
         <ul>
           <li><a href="/app?mode=login">Log in</a></li>
-          <li><a href="/privacy">Privacy policy</a></li>
+          <li><a href="/app?mode=signup">Sign up</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
         </ul>
       </div>
-      <p class="legal">&copy; 2026 Ledgr by FocusOnU Growth Consulting, Abuja, Nigeria.</p>
+      <p class="legal">&copy; 2026 Ledgr by FocusOnU Growth Consulting, Abuja, Nigeria. <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a></p>
     </div>
   </footer>
 

@@ -204,10 +204,16 @@ export default function Chat({ session }) {
     setMessages((m) => [...m, temp]);
     setThinking(true);
     try {
-      const { message, free_left } = await callFn("chat", { message: text });
+      const { message } = await callFn("chat", { message: text });
       setMessages((m) => [...m, message]);
-      noteUse(free_left);
+      loadBilling(); // refresh the question counter
     } catch (err) {
+      if (err.payload?.limit) {
+        setMessages((m) => m.filter((x) => x.id !== temp.id));
+        setDraft(text);
+        flash(err.message);
+        return;
+      }
       if (err.payload?.paywall) {
         setMessages((m) => m.filter((x) => x.id !== temp.id));
         setDraft(text);
@@ -235,6 +241,10 @@ export default function Chat({ session }) {
   }
 
   const firstName = user.user_metadata?.full_name?.split(" ")[0];
+  const questionsLeft = billing?.chat_limit != null ? Math.max(billing.chat_limit - (billing.chat_used ?? 0), 0) : null;
+  const upgradeReason = questionsLeft === 0
+    ? "You've used this month's free AI questions."
+    : billing?.free_left === 0 ? "You've used your 3 free receipts." : "";
 
   function Overview() {
     return (
@@ -242,7 +252,9 @@ export default function Chat({ session }) {
         <div className="stat-cards">
           <div className="stat-card"><span>Receipts</span><b>{extracted.length}</b></div>
           <div className="stat-card"><span>Spent this month</span><b>{money(monthSpend, "NGN")}</b></div>
-          <div className="stat-card"><span>Sheets</span><b>{sheets.length}</b></div>
+          {questionsLeft != null
+            ? <div className="stat-card"><span>AI questions left</span><b>{questionsLeft}</b></div>
+            : <div className="stat-card"><span>Sheets</span><b>{sheets.length}</b></div>}
         </div>
         <div className="quick">
           <button className="quick-btn" onClick={() => fileRef.current?.click()} disabled={uploading}>
@@ -263,7 +275,10 @@ export default function Chat({ session }) {
         <Wordmark small />
         {billing?.pro && (
           <span className="plan-chip plan-pro">
-            {billing.owner ? "Owner" : "Pro: " + Math.max(billing.pro_limit - billing.pro_used, 0) + " left"}
+            {billing.owner
+              ? "Owner"
+              : "Pro: " + Math.max(billing.pro_limit - billing.pro_used, 0) + " receipts" +
+                (billing.chat_limit != null ? ", " + Math.max(billing.chat_limit - (billing.chat_used ?? 0), 0) + " questions" : "")}
           </span>
         )}
         <div className="menu-wrap">
@@ -286,8 +301,11 @@ export default function Chat({ session }) {
       {billing && !billing.pro && (
         <div className="pro-banner">
           <span>
-            <strong>{billing.free_left > 0 ? billing.free_left + " of " + billing.free_limit + " free tries left." : "Free tries used up."}</strong>{" "}
-            Go Pro: 100 receipts a month for ₦5,000.
+            <strong>
+              {"Free: " + billing.free_left + " of " + billing.free_limit + " receipts"}
+              {billing.chat_limit != null ? ", " + Math.max(billing.chat_limit - (billing.chat_used ?? 0), 0) + " of " + billing.chat_limit + " questions left." : " left."}
+            </strong>{" "}
+            Go Pro: 100 receipts and 50 questions a month for ₦5,000.
           </span>
           <button className="btn btn-primary btn-sm" onClick={() => setUpgradeOpen(true)}>Go Pro</button>
         </div>
@@ -397,7 +415,7 @@ export default function Chat({ session }) {
         <ExtractModal count={extractFor.length} onLater={() => setExtractFor(null)}
           onExtract={(instructions) => extract(extractFor, instructions)} />
       )}
-      {upgradeOpen && <UpgradeModal onClose={() => setUpgradeOpen(false)} reason={billing?.free_left === 0 ? "You've used your 3 free tries." : ""} />}
+      {upgradeOpen && <UpgradeModal onClose={() => setUpgradeOpen(false)} reason={upgradeReason} />}
       {sheetFor && (
         <SheetModal receiptIds={sheetFor} onClose={() => setSheetFor(null)}
           onDone={(sheet) => {

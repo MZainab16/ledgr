@@ -7,7 +7,7 @@ export default defineConfig({
   publicDir: "static",
   build: {
     rollupOptions: {
-      input: { main: "index.html", privacy: "privacy.html", app: "app.html" },
+      input: { main: "index.html", privacy: "privacy.html", terms: "terms.html", app: "app.html" },
     },
   },
 });

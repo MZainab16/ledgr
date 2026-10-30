@@ -68,6 +68,12 @@ export default function Auth() {
         {error && <p className="msg-error" role="alert">{error}</p>}
         {notice && <p className="msg-notice">{notice}</p>}
 
+        {mode === "signup" && (
+          <p className="legal-note">
+            By creating an account you agree to Ledgr's <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+          </p>
+        )}
+
         <button className="btn btn-primary btn-block" disabled={busy}>
           {busy ? "Please wait…" : mode === "signup" ? "Create account" : mode === "signin" ? "Sign in" : "Send reset link"}
         </button>
@@ -82,7 +88,10 @@ export default function Auth() {
           )}
         </div>
       </form>
-      <p className="auth-foot">Your receipts are private to your account.</p>
+      <p className="auth-foot">
+        Your receipts are private to your account.{" "}
+        <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
+      </p>
     </main>
   );
 }

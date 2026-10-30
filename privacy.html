@@ -7,14 +7,20 @@
   <meta name="description" content="How Ledgr collects, uses and protects your receipts, account details and Google Sheets data." />
   <link rel="canonical" href="https://useledgr.com.ng/privacy" />
   <link rel="icon" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font: 17px/1.7 "Schibsted Grotesk", system-ui, sans-serif; color: #13221B; background: #F4F6F1; }
-    header { background: #163A2C; padding: 1.1rem 1.25rem; }
-    header a { color: #FFFFFF; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.04em; text-decoration: none; border-bottom: 5px double #C6F33D; }
+    .site-head { background: #163A2C; }
+    .site-head .in { max-width: 60rem; margin: 0 auto; padding: .9rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .brand { display: inline-flex; align-items: center; gap: .55rem; color: #FFFFFF; font-weight: 800; font-size: 1.45rem; letter-spacing: -0.04em; text-decoration: none; }
+    .brand svg { width: 36px; height: 36px; }
+    .head-links { display: flex; gap: 1rem; align-items: center; }
+    .head-links a { color: #DDE7DF; text-decoration: none; font-weight: 600; font-size: .95rem; }
+    .head-links .cta { background: #C6F33D; color: #10251C; padding: .5rem 1rem; border-radius: 999px; }
     main { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
     h1 { font-size: 2.2rem; line-height: 1.15; margin: 0 0 .5rem; letter-spacing: -0.02em; }
     h2 { font-size: 1.3rem; margin: 2.2rem 0 .5rem; }
@@ -23,14 +29,25 @@
     li { margin: .3rem 0; }
     a { color: #1F7A5C; }
     .box { background: #FFFFFF; border: 1px solid #E1E8E2; border-radius: 16px; padding: 1rem 1.25rem; }
-    footer { text-align: center; color: #6B7A72; font-size: .9rem; padding: 0 1rem 2.5rem; }
+    .site-foot { background: #0F2A20; color: #BFD0C5; font-size: .9rem; }
+    .site-foot .in { max-width: 60rem; margin: 0 auto; padding: 1.75rem 1.25rem; display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; justify-content: space-between; }
+    .site-foot a { color: #BFD0C5; text-decoration: none; margin-right: 1rem; }
+    .site-foot a:hover { color: #C6F33D; }
+    @media (max-width: 560px) { .head-links .hide-sm { display: none; } }
   </style>
 </head>
 <body>
-  <header><a href="/">Ledgr</a></header>
+  <header class="site-head"><div class="in">
+    <a href="/" class="brand" aria-label="Ledgr home"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#C6F33D"/><rect x="160" y="104" width="70" height="230" rx="10" fill="#163A2C"/><rect x="160" y="268" width="192" height="66" rx="10" fill="#163A2C"/><rect x="160" y="362" width="192" height="16" rx="8" fill="#163A2C"/><rect x="160" y="394" width="192" height="16" rx="8" fill="#163A2C"/></svg>Ledgr</a>
+    <nav class="head-links" aria-label="Main">
+      <a href="/app?mode=login" class="hide-sm">Log in</a>
+      <a href="/app?mode=signup" class="cta">Sign up free</a>
+    </nav>
+  </div></header>
   <main>
+
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 22 October 2026</p>
+    <p class="updated">Last updated: 30 October 2026</p>
 
     <p>Ledgr ("we", "us") is an AI receipt scanning app operated by FocusOnU Growth Consulting in Abuja, Nigeria, available at <a href="https://useledgr.com.ng">useledgr.com.ng</a>. This policy explains what information we collect, why we collect it, and the choices you have. We handle personal data in line with the Nigeria Data Protection Act 2023.</p>
 
@@ -40,7 +57,7 @@
       <li><strong>Receipts you upload:</strong> the images or PDFs you upload, and the details read from them, such as business names, dates, items, amounts and payment methods.</li>
       <li><strong>Chat messages:</strong> the questions you ask Ledgr's AI assistant and its answers, so it can remember the conversation.</li>
       <li><strong>Google connection:</strong> if you connect Google, your Google email address and an access token that lets Ledgr create and update sheets for you.</li>
-      <li><strong>Subscription details:</strong> your plan, usage counts and a Paystack customer reference. We never see or store your card or bank details; Paystack handles payments.</li>
+      <li><strong>Subscription details:</strong> your plan, monthly usage counts (receipts read and AI questions asked) and a Paystack customer reference. We never see or store your card or bank details; Paystack handles payments.</li>
     </ul>
 
     <h2>How we use your information</h2>
@@ -51,7 +68,7 @@
       <li>To run your account, apply plan limits and process subscriptions.</li>
       <li>To keep Ledgr secure and fix problems.</li>
     </ul>
-    <p>We do not sell your data, and we do not use your receipts for advertising.</p>
+    <p>We do not sell your data, and we do not use your receipts for advertising. Please also read our <a href="/terms">Terms of Service</a>.</p>
 
     <h2>Google user data</h2>
     <div class="box">
@@ -86,7 +103,11 @@
 
     <h2>Contact us</h2>
     <p>FocusOnU Growth Consulting, Abuja, Nigeria<br />Email: <a href="mailto:mzainab328@gmail.com">mzainab328@gmail.com</a></p>
+  
   </main>
-  <footer>&copy; 2026 Ledgr by FocusOnU Growth Consulting. <a href="/">Back to home</a></footer>
+  <footer class="site-foot"><div class="in">
+    <span>&copy; 2026 Ledgr by FocusOnU Growth Consulting, Abuja, Nigeria.</span>
+    <span><a href="/">Home</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a></span>
+  </div></footer>
 </body>
 </html>

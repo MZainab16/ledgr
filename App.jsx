@@ -22,8 +22,24 @@ export default function App() {
   return session ? <Chat session={session} /> : <Auth />;
 }
 
+export function LogoMark() {
+  return (
+    <svg viewBox="0 0 512 512" aria-hidden="true" className="logo-mark">
+      <rect width="512" height="512" rx="112" fill="#163A2C" />
+      <rect x="160" y="104" width="70" height="230" rx="10" fill="#FFFFFF" />
+      <rect x="160" y="268" width="192" height="66" rx="10" fill="#FFFFFF" />
+      <rect x="160" y="362" width="192" height="16" rx="8" fill="#C6F33D" />
+      <rect x="160" y="394" width="192" height="16" rx="8" fill="#C6F33D" />
+    </svg>
+  );
+}
+
 export function Wordmark({ small }) {
-  return <span className={small ? "wordmark wordmark-sm" : "wordmark"} aria-label="Ledgr">Ledgr</span>;
+  return (
+    <a href="/" className={small ? "wordmark wordmark-sm" : "wordmark"} aria-label="Ledgr home">
+      <LogoMark /><span>Ledgr</span>
+    </a>
+  );
 }
 
 function NewPassword({ onDone }) {
