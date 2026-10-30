@@ -4,7 +4,9 @@ import { Wordmark } from "./App.jsx";
 import PasswordInput from "./PasswordInput.jsx";
 
 export default function Auth() {
-  const [mode, setMode] = useState("signin"); // signin | signup | reset
+    // The website's "Sign up" buttons open /app?mode=signup, "Log in" opens /app?mode=login
+  const [mode, setMode] = useState(() =>
+    new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "signin"); // signin | signup | reset
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
