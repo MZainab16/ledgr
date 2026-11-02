@@ -416,3 +416,12 @@ input:focus, textarea:focus { border-color: var(--ledger); outline: none; }
 }
 .type-chip.on { border-color: var(--ledger); background: var(--ledger-soft); color: var(--ledger); }
 @media (max-width: 480px) { .plan-chip { max-width: 38vw; overflow: hidden; text-overflow: ellipsis; } }
+
+
+/* Record sections in the card */
+.rec-section { display: grid; gap: .5rem; }
+.rec-heading {
+  margin: .25rem 0 0; padding: .35rem .6rem; border-radius: 8px;
+  background: var(--ledger); color: var(--ledger-ink); font-size: .8rem; letter-spacing: .03em;
+}
+.field-plain dd { font-weight: 600; }

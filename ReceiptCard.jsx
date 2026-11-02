@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase.js";
 import { money, niceDate } from "./format.js";
-import { downloadExcel } from "./records.js";
+import { downloadExcel, sectionsOf } from "./records.js";
 
 
 export default function ReceiptCard({ receipt, onExtract, onSendToSheets, sheetTitle }) {
@@ -54,26 +54,35 @@ export default function ReceiptCard({ receipt, onExtract, onSendToSheets, sheetT
         <div className="receipt-body">
           {x.summary && <p className="receipt-summary">{x.summary}</p>}
 
-          {x.fields?.length > 0 && (
-            <dl className="fields">
-              {x.fields.map((f, i) => (
-                <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>
-              ))}
-            </dl>
-          )}
-
-          {x.columns?.length > 0 && (
-            <div className="table-wrap" tabIndex={0} aria-label="Record table">
-              <table className="ledger">
-                <thead><tr>{x.columns.map((c, i) => <th key={i}>{c}</th>)}</tr></thead>
-                <tbody>
-                  {(x.rows ?? []).map((row, ri) => (
-                    <tr key={ri}>{x.columns.map((_, ci) => <td key={ci}>{row[ci] ?? ""}</td>)}</tr>
+          {sectionsOf(receipt).map((sec, si) => (
+            <section className="rec-section" key={si}>
+              {sec.heading && <h4 className="rec-heading">{sec.heading}</h4>}
+              {sec.fields?.length > 0 && (
+                <dl className="fields">
+                  {sec.fields.map((f, i) => (
+                    <div key={i} className={f.label ? "" : "field-plain"}>
+                      {f.label && <dt>{f.label}</dt>}
+                      <dd>{f.value}</dd>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                </dl>
+              )}
+              {sec.columns?.length > 0 && sec.rows?.length > 0 && (
+                <div className="table-wrap" tabIndex={0} aria-label={sec.heading || "Record table"}>
+                  <table className="ledger">
+                    {!sec.columns.every((c) => /^Column \d+$/.test(String(c).trim())) && (
+                      <thead><tr>{sec.columns.map((c, i) => <th key={i}>{c}</th>)}</tr></thead>
+                    )}
+                    <tbody>
+                      {sec.rows.map((row, ri) => (
+                        <tr key={ri}>{sec.columns.map((_, ci) => <td key={ci}>{row[ci] ?? ""}</td>)}</tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          ))}
 
           {receipt.total != null && (
             <div className="total-line">

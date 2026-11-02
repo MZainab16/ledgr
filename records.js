@@ -1,9 +1,3 @@
-// Lays out records for spreadsheets: one tab per source (for example one business),
-// shared details shown once at the top, then each record top to bottom.
-// The same layout is used for Google Sheets on the server.
-
-// Plain numbers become real numbers so Sheets can add them up.
-// Anything else (including phone numbers with a leading 0) stays exactly as written.
 function cell(v) {
   if (typeof v === "number" && isFinite(v)) return v;
   const t = String(v ?? "").trim();
@@ -11,102 +5,174 @@ function cell(v) {
   if (/^-?0\.\d+$/.test(t)) return Number(t);
   return String(v ?? "");
 }
-const norm = (s) => String(s ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
-const lineKey = (f) => norm(f.label) + "|" + String(f.value ?? "").trim().toLowerCase();
-const fieldRow = (f) => (String(f.label ?? "").trim() ? [String(f.label), cell(f.value)] : [cell(f.value)]);
-
-export function groupName(r) {
+const text = (v) => String(v ?? "").trim();
+const norm = (v) => text(v).toLowerCase().replace(/[^a-z0-9]+/g, "");
+const lineKey = (f) => norm(f.label) + "|" + text(f.value).toLowerCase();
+const fieldRow = (f) => text(f.label) ? [text(f.label), cell(f.value)] : [cell(f.value)];
+function sectionsOf(r) {
   const x = r.extracted ?? {};
-  // Records from a business or person are grouped by that source.
-  // Records without one (like daily sales pages) are grouped by their type.
-  const src = String(x.source_name ?? "").trim() ||
-    String(((x.fields ?? []).find((f) => f.kind === "source") ?? {}).value ?? "").trim();
-  if (src) return src;
-  const type = String(x.record_type ?? "").trim();
-  if (type) return type.charAt(0).toUpperCase() + type.slice(1);
-  return String(x.title || r.merchant || "Records").trim() || "Records";
+  if (Array.isArray(x.sections) && x.sections.length) return x.sections;
+  const fields = x.fields ?? [];
+  const out = [{
+    heading: "",
+        fields: fields.filter((f) => !f.after_table),
+    columns: x.columns ?? [],
+    rows: x.rows ?? []
+  }];
+  const after = fields.filter((f) => f.after_table);
+  if (after.length) out.push({ heading: "", fields: after, columns: [], rows: [] });
+  return out;
 }
-export function groupKey(r) {
+const allFields = (r) => sectionsOf(r).flatMap((s) => s.fields ?? []);
+function groupName(r) {
+  const x = r.extracted ?? {};
+  const src = text(x.source_name) || text((allFields(r).find((f) => f.kind === "source") ?? {}).value);
+  if (src) return src;
+  const type = text(x.record_type);
+  if (type) return type.charAt(0).toUpperCase() + type.slice(1);
+  return text(x.title || r.merchant) || "Records";
+}
+function groupKey(r) {
   return norm(groupName(r)) || "records";
 }
-
-// Builds the rows for one tab. styles marks which rows are titles, record headings and column headings.
-export function buildTab(records) {
-  // Drop exact duplicates (the same record uploaded twice)
-  const seen = new Set();
+function recordLabel(r) {
+  const ids = allFields(r).filter((f) => f.kind === "id");
+  if (ids.length) {
+    return ids.map((f) => text(f.label) ? text(f.label) + " " + text(f.value) : text(f.value)).join("  \xB7  ");
+  }
+  return text(r.receipt_date) || text(r.extracted?.title) || text(r.created_at).slice(0, 10) || "Record";
+}
+function keyed(names) {
+  const seen = {};
+  return names.map((n) => {
+    const k = norm(n);
+    seen[k] = (seen[k] ?? 0) + 1;
+    return { key: k + "#" + seen[k], title: text(n) };
+  });
+}
+function buildTab(records) {
+  const seen = /* @__PURE__ */ new Set();
   const recs = records.filter((r) => {
-    const x = r.extracted ?? {};
-    const sig = JSON.stringify([(x.fields ?? []).map(lineKey), x.columns ?? [], x.rows ?? []]);
+    const sig = JSON.stringify(sectionsOf(r));
     if (seen.has(sig)) return false;
     seen.add(sig);
     return true;
-  }).sort((a, b) =>
-    String(a.receipt_date ?? "").localeCompare(String(b.receipt_date ?? "")) ||
-    String(a.created_at ?? "").localeCompare(String(b.created_at ?? "")));
-
+  }).sort((a, b) => text(a.receipt_date).localeCompare(text(b.receipt_date)) || text(a.created_at).localeCompare(text(b.created_at)));
+  const multi = recs.length > 1;
   const title = groupName(recs[0] ?? {});
-  // Shared lines: business details, plus any line that is identical on every record in the tab
-    const fieldsOf = (r) => (r.extracted?.fields ?? []);
-  const sharedKeys = new Set();
-    const sharedLines = [];
+  const sharedKeys = /* @__PURE__ */ new Set();
+  const sharedLines = [];
   for (const r of recs) {
-    for (const f of fieldsOf(r)) {
+    for (const f of allFields(r)) {
       const k = lineKey(f);
       if (sharedKeys.has(k)) continue;
-      // Unlabelled lines found on every record (like "Thank you!") are shown once too.
-      // Identifiers and labelled details (like Total) always stay with their own record.
-      const onEvery = recs.length > 1 && f.kind !== "id" && !String(f.label ?? "").trim() &&
-        recs.every((o) => fieldsOf(o).some((g) => lineKey(g) === k));
-      if (f.kind === "source" || onEvery) { sharedKeys.add(k); sharedLines.push(f); }
+      const onEvery = multi && f.kind !== "id" && !text(f.label) &&       recs.every((o) => allFields(o).some((g) => lineKey(g) === k));
+      if (f.kind === "source" || onEvery) {
+        sharedKeys.add(k);
+        sharedLines.push(f);
+      }
     }
   }
-
   const rows = [];
   const styles = [];
   const add = (row, kind) => {
     if (kind) styles.push({ row: rows.length, kind });
     rows.push(row);
   };
-
-  const hasSource = recs.some((r) => String(r.extracted?.source_name ?? "").trim() ||
-    (r.extracted?.fields ?? []).some((f) => f.kind === "source"));
-  if (hasSource) add([title], "title");
+  const hasSource = !!text(recs[0]?.extracted?.source_name) || sharedLines.some((f) => f.kind === "source");
+  const firstName = sharedLines.find((f) => f.kind === "source" && !text(f.label));
+  if (hasSource) add([firstName ? cell(firstName.value) : title], "title");
   for (const f of sharedLines) {
-    if (!String(f.label ?? "").trim() && norm(f.value) === norm(title)) continue;
+    if (f === firstName) continue;
+    if (!text(f.label) && norm(f.value) === norm(title)) continue;
     add(fieldRow(f));
   }
-  if (hasSource || sharedLines.length) add([]);
-
-  let lastCols = "";
-  for (const r of recs) {
-    const x = r.extracted ?? {};
-    const own = fieldsOf(r).filter((f) => !sharedKeys.has(lineKey(f)));
-    const ids = own.filter((f) => f.kind === "id");
-    const heading = ids.length
-      ? ids.map((f) => (String(f.label ?? "").trim() ? String(f.label).trim() + " " + String(f.value ?? "").trim() : String(f.value ?? "").trim())).join("  ·  ")
-      : String(r.receipt_date || x.title || String(r.created_at ?? "").slice(0, 10) || "Record");
-    add([heading], "record");
-
-    const rest = own.filter((f) => f.kind !== "id");
-    for (const f of rest.filter((f) => !f.after_table)) add(fieldRow(f));
-
-    const cols = x.columns ?? [];
-    if (cols.length) {
-      const key = JSON.stringify(cols);
-      const madeUp = cols.every((c) => /^Column \d+$/.test(String(c).trim()));
-      if (key !== lastCols && !madeUp) add(cols.map(String), "head");
-      lastCols = key;
-      for (const row of (x.rows ?? [])) add(cols.map((_, i) => cell(row[i])));
-    }
-
-    for (const f of rest.filter((f) => f.after_table)) add(fieldRow(f));
-    if (x.notes) add(["Notes", String(x.notes)]);
-    add(["Date extracted", String(r.created_at ?? new Date().toISOString()).slice(0, 10)]);
+  if (rows.length) add([]);
+  if (!multi && recs[0]) {
+    add([recordLabel(recs[0])], "record");
     add([]);
   }
-  return { title, rows, styles };
+  const order = [];
+  const secs = /* @__PURE__ */ new Map();
+  for (const r of recs) {
+    let blank = 0;
+    for (const s of sectionsOf(r)) {
+      const key = text(s.heading) ? "h:" + norm(s.heading) : "b:" + blank++;
+      if (!secs.has(key)) {
+        secs.set(key, { heading: text(s.heading), items: [] });
+        order.push(key);
+      }
+      secs.get(key).items.push({
+        r,
+                fields: (s.fields ?? []).filter((f) => f.kind !== "source" && f.kind !== "id" && !sharedKeys.has(lineKey(f))),
+        columns: (s.columns ?? []).map(String),
+        rows: s.rows ?? []
+      });
+    }
+  }
+  for (const key of order) {
+    const sec = secs.get(key);
+    const hasFields = sec.items.some((i) => i.fields.length);
+    const hasTable = sec.items.some((i) => i.columns.length && i.rows.length);
+    if (!hasFields && !hasTable) continue;
+    if (sec.heading) add([sec.heading], "section");
+    if (hasFields) {
+      if (!multi) {
+        for (const f of sec.items[0].fields) add(fieldRow(f));
+      } else {
+        const cols = [];
+        for (const i of sec.items) {
+          for (const c of keyed(i.fields.map((f) => text(f.label)))) {
+            if (!cols.some((x) => x.key === c.key)) cols.push(c);
+          }
+        }
+        add(["Record", ...cols.map((c) => c.title)], "head");
+        for (const i of sec.items) {
+          if (!i.fields.length) continue;
+          const ks = keyed(i.fields.map((f) => text(f.label)));
+          add([recordLabel(i.r), ...cols.map((c) => {
+            const at = ks.findIndex((k) => k.key === c.key);
+            return at >= 0 ? cell(i.fields[at].value) : "";
+          })]);
+        }
+      }
+    }
+    if (hasTable) {
+      const cols = [];
+      for (const i of sec.items) for (const c of keyed(i.columns)) if (!cols.some((x) => x.key === c.key)) cols.push(c);
+      const madeUp = cols.every((c) => /^Column \d+$/.test(c.title));
+      if (multi || !madeUp) add([...multi ? ["Record"] : [], ...cols.map((c) => c.title)], "head");
+      for (const i of sec.items) {
+        const ks = keyed(i.columns);
+        for (const row of i.rows) {
+          const values = cols.map((c) => {
+            const at = ks.findIndex((k) => k.key === c.key);
+            return at >= 0 ? cell(row[at]) : "";
+          });
+          add(multi ? [recordLabel(i.r), ...values] : values);
+        }
+      }
+    }
+    add([]);
+  }
+  if (multi) {
+    add(["Extraction details"], "section");
+    add(["Record", "Date extracted", "Notes"], "head");
+    for (const r of recs) add([recordLabel(r), text(r.created_at).slice(0, 10), text(r.extracted?.notes)]);
+  } else if (recs[0]) {
+    add(["Date extracted", text(recs[0].created_at).slice(0, 10)]);
+    if (text(recs[0].extracted?.notes)) add(["Notes", text(recs[0].extracted?.notes)]);
+  }
+  const width = Math.max(2, ...rows.map((r) => r.length));
+  return { title, rows, styles, width };
 }
-
+export {
+  buildTab,
+  cell,
+  groupKey,
+  groupName,
+  sectionsOf
+};
 
 function sheetName(raw, used) {
   const base = raw.replace(/[[\]*?/\\:]/g, " ").replace(/\s+/g, " ").trim().slice(0, 28) || "Records";
@@ -117,7 +183,7 @@ function sheetName(raw, used) {
   return name;
 }
 
-// Download one or more records as an Excel file, grouped into tabs the same way as Google Sheets.
+// Download one or more records as an Excel file, organised the same way as Google Sheets.
 export async function downloadExcel(records, fileName) {
   const mod = await import("xlsx");
   const XLSX = mod.utils ? mod : mod.default;
@@ -132,8 +198,15 @@ export async function downloadExcel(records, fileName) {
   for (const recs of groups.values()) {
     const built = buildTab(recs);
     const ws = XLSX.utils.aoa_to_sheet(built.rows);
-    const width = Math.max(2, ...built.rows.map((r) => r.length));
-    ws["!cols"] = Array.from({ length: width }, (_, i) => ({ wch: i === 0 ? 32 : 18 }));
+    // Headings span the full width, like in Google Sheets
+    ws["!merges"] = built.styles
+      .filter((s) => s.kind !== "head")
+      .map((s) => ({ s: { r: s.row, c: 0 }, e: { r: s.row, c: built.width - 1 } }));
+    ws["!cols"] = Array.from({ length: built.width }, (_, i) => {
+      const longest = Math.max(8, ...built.rows.map((r, ri) =>
+        built.styles.some((s) => s.row === ri && s.kind !== "head") ? 0 : String(r[i] ?? "").length));
+      return { wch: Math.min(longest + 2, 45) };
+    });
     XLSX.utils.book_append_sheet(wb, ws, sheetName(built.title, used));
   }
   const safe = (fileName || "Ledgr records").replace(/[\\/:*?"<>|]+/g, " ").trim().slice(0, 80) || "Ledgr records";
